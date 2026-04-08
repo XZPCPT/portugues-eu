@@ -68,7 +68,7 @@ export default function LessonPage({ params }: { params: { lessonId: string } })
       if (state.xp >= 200) earned.add('speed');
       if (new Date().getHours() >= 21) earned.add('night_owl');
 
-      state.earnedAchievements = [...earned];
+      state.earnedAchievements = Array.from(earned);
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (_) {}
