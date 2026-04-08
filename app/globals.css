@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --blu: #0b3d82;
+  --blu2: #1a6ec4;
+  --blu3: #85bcee;
+  --blu4: #dff0ff;
+  --cream: #faf4ea;
+  --ivory: #fffdf5;
+  --gold: #c98f00;
+  --gold2: #fff3c8;
+  --terra: #c85830;
+  --sage: #3d7a58;
+  --sage2: #e2f5ea;
+  --txt: #0a1e3c;
+  --txt2: #253448;
+  --txt3: #6d7d8e;
+  --brd: #dbd3c4;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #faf4ea;
+    color: #0a1e3c;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  /* ── Tile pattern overlay (Portugal azulejo vibe) ── */
+  .tile-pattern::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.055) 0, rgba(255,255,255,.055) 1px, transparent 1px, transparent 16px),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,.055) 0, rgba(255,255,255,.055) 1px, transparent 1px, transparent 16px);
+    pointer-events: none;
+  }
+
+  /* ── Animated gradient bar ── */
+  .grad-bar::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #e53e2f, #c98f00, #c85830, #e53e2f);
+    background-size: 200% 100%;
+    animation: gradShift 4s ease infinite;
+  }
+
+  /* ── Progress shimmer fill ── */
+  .progress-shimmer {
+    background: linear-gradient(90deg, #0b3d82, #1a6ec4, #c98f00);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+
+  /* ── Card base ── */
+  .card {
+    @apply bg-ivory border border-brd rounded-2xl shadow-card;
+  }
+
+  /* ── Button primary ── */
+  .btn-primary {
+    @apply bg-blu text-white font-semibold rounded-xl px-5 py-3 transition-all duration-200
+           hover:bg-blu2 active:scale-95;
+  }
+
+  /* ── Button secondary ── */
+  .btn-secondary {
+    @apply bg-ivory text-txt2 font-semibold rounded-xl px-5 py-3 border border-brd
+           transition-all duration-200 hover:border-blu2 hover:text-blu;
+  }
+
+  /* ── Gold accent chip ── */
+  .chip-gold {
+    @apply bg-gold2 border border-gold text-gold text-xs font-bold px-3 py-1 rounded-full;
+  }
+}
+
+@keyframes gradShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400% 0; }
+  100% { background-position: 400% 0; }
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%       { transform: translateY(-10px) rotate(3deg); }
+}
+
+@keyframes popIn {
+  0%   { transform: scale(.4); opacity: 0; }
+  65%  { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(11,61,130,.15); }
+  50%       { box-shadow: 0 0 0 8px rgba(11,61,130,.06); }
+}
