@@ -45,9 +45,11 @@ export interface Lesson {
   exercises: Exercise[];
 }
 
-// ── Seed data (10 A1 lessons) ────────────────────────────────────────────────
+// ── Seed data (25 A1 lessons) ────────────────────────────────────────────────
+// Lessons 1–10 defined here; 11–25 imported from lessons-extended.ts
+import { LESSONS_EXTENDED } from './lessons-extended';
 
-export const LESSONS: Lesson[] = [
+const LESSONS_BASE: Lesson[] = [
   {
     id: 1, emoji: '👋', number: 'Lesson 01', title: 'Greetings & Hellos',
     theme: 'Every journey begins with a hello. Learn your first Portuguese greetings!',
@@ -279,6 +281,8 @@ export const LESSONS: Lesson[] = [
     ],
   },
 ];
+
+export const LESSONS: Lesson[] = [...LESSONS_BASE, ...LESSONS_EXTENDED];
 
 export const ACHIEVEMENTS = [
   { id: 'first_step',     emoji: '🌱', name: 'First Steps',     desc: 'Complete your first lesson' },

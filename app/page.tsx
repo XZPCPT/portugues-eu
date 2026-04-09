@@ -4,44 +4,24 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import LessonCard from '@/components/LessonCard';
-import { LESSONS, ACHIEVEMENTS } from '@/data/lessons';
-
-const STORAGE_KEY = 'pt_eu_v1';
-
-interface ProgressState {
-  xp: number;
-  hearts: number;
-  streak: number;
-  lessonProgress: Record<number, { stars: number; completed: boolean }>;
-  earnedAchievements: string[];
-}
-
-const defaultState: ProgressState = {
-  xp: 0,
-  hearts: 5,
-  streak: 0,
-  lessonProgress: {},
-  earnedAchievements: [],
-};
+import { ALL_LESSONS, ACHIEVEMENTS } from '@/data/all-lessons';
+import { loadProgress, type ProgressState, defaultProgress } from '@/lib/progress';
+import { countDue } from '@/lib/srs';
 
 export default function HomePage() {
-  const [state, setState] = useState<ProgressState>(defaultState);
+  const [state, setState] = useState<ProgressState>(defaultProgress);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setState(JSON.parse(saved));
-    } catch (_) {}
+    loadProgress().then(setState);
   }, []);
 
   const completedCount = Object.values(state.lessonProgress).filter(p => p.completed).length;
-  const totalWords = completedCount * 5; // 5 words per lesson
+  const totalWords = completedCount * 5;
+  const dueCount = countDue(state.wordReviews);
 
-  // Determine lesson statuses
   const getLessonStatus = (id: number): 'completed' | 'active' | 'locked' => {
     if (state.lessonProgress[id]?.completed) return 'completed';
-    // First incomplete lesson after all completed ones is active
-    const firstIncomplete = LESSONS.find(l => !state.lessonProgress[l.id]?.completed);
+    const firstIncomplete = ALL_LESSONS.find(l => !state.lessonProgress[l.id]?.completed);
     if (firstIncomplete?.id === id) return 'active';
     if (id === 1 && !state.lessonProgress[1]?.completed) return 'active';
     return 'locked';
@@ -55,14 +35,13 @@ export default function HomePage() {
 
         {/* Hero / next lesson card */}
         {(() => {
-          const nextLesson = LESSONS.find(l => !state.lessonProgress[l.id]?.completed) ?? LESSONS[0];
+          const nextLesson = ALL_LESSONS.find(l => !state.lessonProgress[l.id]?.completed) ?? ALL_LESSONS[0];
           return (
             <Link
               href={`/learn/${nextLesson.id}`}
               className="block no-underline rounded-2xl overflow-hidden mb-8 shadow-hero relative"
               style={{ background: 'linear-gradient(135deg,#0b3d82 0%,#1a6ec4 100%)' }}
             >
-              {/* tile overlay */}
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -94,7 +73,7 @@ export default function HomePage() {
           {[
             { label: 'XP', value: state.xp, sub: 'total points', accent: '#0b3d82' },
             { label: 'Words', value: totalWords, sub: 'words learned', accent: '#c85830' },
-            { label: 'Lessons', value: completedCount, sub: `of ${LESSONS.length} done`, accent: '#c98f00' },
+            { label: 'Lessons', value: completedCount, sub: `of ${ALL_LESSONS.length} done`, accent: '#c98f00' },
             { label: 'Streak', value: state.streak, sub: 'day streak 🔥', accent: '#e53e2f' },
           ].map(({ label, value, sub, accent }) => (
             <div key={label} className="card p-4 relative overflow-hidden">
@@ -106,19 +85,31 @@ export default function HomePage() {
           ))}
         </div>
 
+        {/* SRS review nudge */}
+        {dueCount > 0 && (
+          <Link href="/review" className="block no-underline card p-4 mb-6 border border-terra/30 hover:shadow-hero transition-shadow group flex items-center gap-4">
+            <div className="text-2xl group-hover:animate-float">🔁</div>
+            <div className="flex-1">
+              <span className="font-semibold text-txt">{dueCount} word{dueCount !== 1 ? 's' : ''} due for review</span>
+              <span className="text-txt3 text-sm ml-2">· Keep your streak strong</span>
+            </div>
+            <div className="chip-gold shrink-0">Review →</div>
+          </Link>
+        )}
+
         {/* Lesson path */}
         <div className="mb-8">
           <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-4">Your Learning Path</div>
           <div className="overflow-x-auto pb-2">
             <div className="flex items-center gap-0 min-w-max px-2">
-              {LESSONS.map((lesson, i) => (
+              {ALL_LESSONS.map((lesson, i) => (
                 <div key={lesson.id} className="flex items-center">
                   <LessonCard
                     lesson={lesson}
                     status={getLessonStatus(lesson.id)}
                     stars={state.lessonProgress[lesson.id]?.stars ?? 0}
                   />
-                  {i < LESSONS.length - 1 && (
+                  {i < ALL_LESSONS.length - 1 && (
                     <div className={`w-10 h-1 rounded-full mx-1 ${state.lessonProgress[lesson.id]?.completed ? 'bg-gradient-to-r from-sage to-blu2' : 'bg-brd'}`} />
                   )}
                 </div>

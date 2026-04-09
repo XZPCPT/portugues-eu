@@ -3,30 +3,19 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { LESSONS } from '@/data/lessons';
-
-const STORAGE_KEY = 'pt_eu_v1';
-
-interface ProgressState {
-  xp: number;
-  hearts: number;
-  streak: number;
-  lessonProgress: Record<number, { stars: number; completed: boolean }>;
-}
+import { ALL_LESSONS } from '@/data/all-lessons';
+import { loadProgress, type ProgressState, defaultProgress } from '@/lib/progress';
 
 export default function LearnPage() {
-  const [state, setState] = useState<ProgressState>({ xp: 0, hearts: 5, streak: 0, lessonProgress: {} });
+  const [state, setState] = useState<ProgressState>(defaultProgress);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setState(JSON.parse(saved));
-    } catch (_) {}
+    loadProgress().then(setState);
   }, []);
 
   const getLessonStatus = (id: number): 'completed' | 'active' | 'locked' => {
     if (state.lessonProgress[id]?.completed) return 'completed';
-    const firstIncomplete = LESSONS.find(l => !state.lessonProgress[l.id]?.completed);
+    const firstIncomplete = ALL_LESSONS.find(l => !state.lessonProgress[l.id]?.completed);
     if (firstIncomplete?.id === id || (id === 1 && !state.lessonProgress[1]?.completed)) return 'active';
     return 'locked';
   };
@@ -40,12 +29,12 @@ export default function LearnPage() {
           <Link href="/" className="btn-secondary text-sm px-3 py-2">← Home</Link>
           <div>
             <h1 className="font-serif text-2xl text-txt">A1 Lessons</h1>
-            <p className="text-xs text-txt3">European Portuguese · Beginner</p>
+            <p className="text-xs text-txt3">European Portuguese · Beginner · {ALL_LESSONS.length} lessons</p>
           </div>
         </div>
 
         <div className="grid gap-4">
-          {LESSONS.map((lesson, i) => {
+          {ALL_LESSONS.map((lesson) => {
             const status = getLessonStatus(lesson.id);
             const progress = state.lessonProgress[lesson.id];
             const stars = progress?.stars ?? 0;

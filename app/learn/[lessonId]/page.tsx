@@ -1,32 +1,24 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LESSONS } from '@/data/lessons';
+import { ALL_LESSONS } from '@/data/all-lessons';
+import { ACHIEVEMENTS } from '@/data/lessons';
 import LessonPlayer from '@/components/LessonPlayer';
-
-const STORAGE_KEY = 'pt_eu_v1';
-
-interface ProgressState {
-  xp: number;
-  hearts: number;
-  streak: number;
-  lessonProgress: Record<number, { stars: number; completed: boolean }>;
-  earnedAchievements: string[];
-}
-
-const defaultState: ProgressState = {
-  xp: 0,
-  hearts: 5,
-  streak: 0,
-  lessonProgress: {},
-  earnedAchievements: [],
-};
+import { loadProgress, saveProgress, defaultProgress, type ProgressState } from '@/lib/progress';
+import { nextReview, wordKey } from '@/lib/srs';
 
 export default function LessonPage({ params }: { params: { lessonId: string } }) {
   const router = useRouter();
   const lessonId = parseInt(params.lessonId);
-  const lesson = LESSONS.find(l => l.id === lessonId);
+  const lesson = ALL_LESSONS.find(l => l.id === lessonId);
+
+  const [progressLoaded, setProgressLoaded] = useState(false);
+
+  useEffect(() => {
+    // Pre-load progress so it's warm in localStorage for handleComplete
+    loadProgress().then(() => setProgressLoaded(true));
+  }, []);
 
   if (!lesson) {
     return (
@@ -40,10 +32,9 @@ export default function LessonPage({ params }: { params: { lessonId: string } })
     );
   }
 
-  const handleComplete = (stars: number, xpGained: number) => {
+  const handleComplete = async (stars: number, xpGained: number) => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const state: ProgressState = saved ? JSON.parse(saved) : { ...defaultState };
+      const state: ProgressState = await loadProgress();
 
       // Update lesson progress
       const existing = state.lessonProgress[lessonId];
@@ -55,6 +46,13 @@ export default function LessonPage({ params }: { params: { lessonId: string } })
       // Add XP
       state.xp += xpGained;
 
+      // Update SRS for all words in this lesson
+      lesson.words.forEach((_, idx) => {
+        const key = wordKey(lessonId, idx);
+        // Mark each word as seen (correct = true for first encounter)
+        state.wordReviews[key] = nextReview(state.wordReviews[key], true);
+      });
+
       // Check achievements
       const earned = new Set(state.earnedAchievements);
       const completedCount = Object.values(state.lessonProgress).filter(p => p.completed).length;
@@ -64,13 +62,13 @@ export default function LessonPage({ params }: { params: { lessonId: string } })
       if (totalWords >= 20) earned.add('word_collector');
       if (completedCount >= 5) earned.add('halfway');
       if (stars === 3) earned.add('flawless');
-      if (completedCount >= LESSONS.length) earned.add('graduate');
+      if (completedCount >= ALL_LESSONS.length) earned.add('graduate');
       if (state.xp >= 200) earned.add('speed');
       if (new Date().getHours() >= 21) earned.add('night_owl');
 
       state.earnedAchievements = Array.from(earned);
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      await saveProgress(state);
     } catch (_) {}
   };
 
