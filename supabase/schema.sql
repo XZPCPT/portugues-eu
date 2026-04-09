@@ -1,5 +1,6 @@
 -- ── Run this entire file in your Supabase dashboard ──────────────────────────
 -- Go to: supabase.com → your project → SQL Editor → New query → paste → Run
+-- Safe to re-run: uses IF NOT EXISTS and DROP IF EXISTS throughout
 
 -- ── 1. Profiles ──────────────────────────────────────────────────────────────
 create table if not exists profiles (
@@ -9,14 +10,21 @@ create table if not exists profiles (
 );
 
 -- Auto-create a profile when a new user signs up
+-- IMPORTANT: exception handler ensures signup NEVER fails due to profile errors
+-- set search_path = public avoids schema resolution issues in Supabase
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
   insert into public.profiles (id, full_name)
-  values (new.id, new.raw_user_meta_data->>'full_name');
+  values (new.id, new.raw_user_meta_data->>'full_name')
+  on conflict (id) do nothing;
+  return new;
+exception when others then
+  -- Log the error but never block signup
+  raise warning 'handle_new_user failed: %', sqlerrm;
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
@@ -45,7 +53,7 @@ begin
   new.updated_at = now();
   return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql set search_path = public;
 
 drop trigger if exists user_progress_updated_at on user_progress;
 create trigger user_progress_updated_at
@@ -56,13 +64,23 @@ create trigger user_progress_updated_at
 alter table profiles      enable row level security;
 alter table user_progress enable row level security;
 
--- Profiles: users can only see/edit their own
+-- Drop policies first so this file is safe to re-run
+drop policy if exists "Users can view own profile"   on profiles;
+drop policy if exists "Users can insert own profile" on profiles;
+drop policy if exists "Users can update own profile" on profiles;
+drop policy if exists "Users can view own progress"   on user_progress;
+drop policy if exists "Users can insert own progress" on user_progress;
+drop policy if exists "Users can update own progress" on user_progress;
+
+-- Profiles
 create policy "Users can view own profile"
   on profiles for select using (auth.uid() = id);
+create policy "Users can insert own profile"
+  on profiles for insert with check (auth.uid() = id);
 create policy "Users can update own profile"
   on profiles for update using (auth.uid() = id);
 
--- Progress: users can only see/edit their own
+-- Progress
 create policy "Users can view own progress"
   on user_progress for select using (auth.uid() = user_id);
 create policy "Users can insert own progress"
