@@ -6,6 +6,8 @@
 create table if not exists profiles (
   id          uuid references auth.users on delete cascade primary key,
   full_name   text,
+  -- 'M' = Masculino (Bem-vindo/obrigado), 'F' = Feminino (Bem-vinda/obrigada)
+  gender      char(1) check (gender in ('M','F')),
   created_at  timestamptz default now()
 );
 
@@ -15,8 +17,12 @@ create table if not exists profiles (
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, full_name)
-  values (new.id, new.raw_user_meta_data->>'full_name')
+  insert into public.profiles (id, full_name, gender)
+  values (
+    new.id,
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'gender'
+  )
   on conflict (id) do nothing;
   return new;
 exception when others then

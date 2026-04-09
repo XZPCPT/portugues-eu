@@ -24,7 +24,7 @@ export default function LoginPage() {
       setError(err.message);
       setLoading(false);
     } else {
-      router.push('/');
+      router.push('/home');
       router.refresh();
     }
   };
@@ -32,9 +32,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
+
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🇵🇹</div>
+          <div className="text-5xl mb-3 animate-float inline-block">🇵🇹</div>
           <h1 className="font-serif text-3xl text-txt">Português EU</h1>
           <p className="text-txt3 text-sm mt-1">Welcome back!</p>
         </div>
@@ -56,7 +57,7 @@ export default function LoginPage() {
               onChange={e => setEmail(e.target.value)}
               required
               placeholder="you@example.com"
-              className="w-full rounded-xl border-2 border-brd bg-ivory px-4 py-3 text-txt outline-none focus:border-blu focus:bg-blu4/10 transition-colors"
+              className="w-full rounded-xl border-2 border-brd bg-ivory px-4 py-3 text-txt outline-none focus:border-blu transition-colors"
             />
           </div>
 
@@ -68,7 +69,7 @@ export default function LoginPage() {
               onChange={e => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full rounded-xl border-2 border-brd bg-ivory px-4 py-3 text-txt outline-none focus:border-blu focus:bg-blu4/10 transition-colors"
+              className="w-full rounded-xl border-2 border-brd bg-ivory px-4 py-3 text-txt outline-none focus:border-blu transition-colors"
             />
           </div>
 
@@ -82,14 +83,12 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-txt3">
             Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-blu font-semibold hover:underline">
-              Sign up
-            </Link>
+            <Link href="/auth/signup" className="text-blu font-semibold hover:underline">Sign up</Link>
           </p>
         </form>
 
         <p className="text-center mt-4">
-          <Link href="/" className="text-xs text-txt3 hover:text-txt">
+          <Link href="/home" className="text-xs text-txt3 hover:text-txt">
             ← Continue without account
           </Link>
         </p>

@@ -69,7 +69,7 @@ export default function ProfilePage() {
       <main className="max-w-2xl mx-auto px-4 py-8 pb-20">
 
         {/* Back link */}
-        <Link href="/" className="btn-secondary text-sm px-3 py-2 inline-block mb-6">← Home</Link>
+        <Link href="/home" className="btn-secondary text-sm px-3 py-2 inline-block mb-6">← Home</Link>
 
         {/* Profile header */}
         <div className="card p-6 mb-6 flex items-center gap-5">

@@ -27,7 +27,7 @@ export default function Navbar({ xp = 0, hearts = 5, streak = 0, reviewCount = 0
       }}
     >
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2.5 no-underline group">
+      <Link href="/home" className="flex items-center gap-2.5 no-underline group">
         <span className="text-2xl group-hover:animate-float">🇵🇹</span>
         <div>
           <div className="font-serif text-white text-lg leading-tight">Português EU</div>

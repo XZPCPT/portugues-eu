@@ -26,7 +26,7 @@ export default function LearnPage() {
 
       <main className="max-w-3xl mx-auto px-4 py-8 pb-20">
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/" className="btn-secondary text-sm px-3 py-2">← Home</Link>
+          <Link href="/home" className="btn-secondary text-sm px-3 py-2">← Home</Link>
           <div>
             <h1 className="font-serif text-2xl text-txt">A1 Lessons</h1>
             <p className="text-xs text-txt3">European Portuguese · Beginner · {ALL_LESSONS.length} lessons</p>

@@ -1,160 +1,313 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import Navbar from '@/components/Navbar';
-import LessonCard from '@/components/LessonCard';
-import { ALL_LESSONS, ACHIEVEMENTS } from '@/data/all-lessons';
-import { loadProgress, type ProgressState, defaultProgress } from '@/lib/progress';
-import { countDue } from '@/lib/srs';
+import { createClient } from '@/lib/supabase';
 
-export default function HomePage() {
-  const [state, setState] = useState<ProgressState>(defaultProgress);
+const features = [
+  {
+    icon: '🧠',
+    title: 'Spaced Repetition',
+    desc: 'Words resurface exactly when you\'re about to forget them. Built on the proven SM-2 algorithm — the same science behind top language apps.',
+  },
+  {
+    icon: '🎭',
+    title: 'European Portuguese Only',
+    desc: 'Not Brazilian. Not generic. Lisbon accent, European spelling, Portugal-specific phrases — the real thing from the start.',
+  },
+  {
+    icon: '🏰',
+    title: 'Culture Built In',
+    desc: 'Fado, pastel de nata, football, azulejos. Language without culture is just vocabulary. We give you both.',
+  },
+  {
+    icon: '📐',
+    title: 'Structured Path',
+    desc: 'From your first "Olá" to full conversations. Every lesson unlocks the next. No overwhelm, no guessing where to start.',
+  },
+];
+
+const steps = [
+  { n: '01', title: 'Create your account', desc: 'Sign up in 30 seconds. We\'ll personalise your experience — including the right grammatical gender for you.' },
+  { n: '02', title: 'Start your first lesson', desc: 'Five new words, ten exercises, instant feedback. Each lesson takes about 5 minutes.' },
+  { n: '03', title: 'Review & advance', desc: 'Your personal review queue keeps vocab fresh. Complete lessons to unlock new ones. Progress at your pace.' },
+];
+
+export default function LandingPage() {
+  const router = useRouter();
 
   useEffect(() => {
-    loadProgress().then(setState);
+    // Redirect logged-in users straight to the dashboard
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) router.replace('/home');
+    });
   }, []);
 
-  const completedCount = Object.values(state.lessonProgress).filter(p => p.completed).length;
-  const totalWords = completedCount * 5;
-  const dueCount = countDue(state.wordReviews);
-
-  const getLessonStatus = (id: number): 'completed' | 'active' | 'locked' => {
-    if (state.lessonProgress[id]?.completed) return 'completed';
-    const firstIncomplete = ALL_LESSONS.find(l => !state.lessonProgress[l.id]?.completed);
-    if (firstIncomplete?.id === id) return 'active';
-    if (id === 1 && !state.lessonProgress[1]?.completed) return 'active';
-    return 'locked';
-  };
-
   return (
-    <div className="min-h-screen bg-cream">
-      <Navbar xp={state.xp} hearts={state.hearts} streak={state.streak} />
+    <div className="min-h-screen bg-cream overflow-x-hidden">
 
-      <main className="max-w-3xl mx-auto px-4 py-8 pb-20">
+      {/* ── Topnav ── */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 50,
+        background: 'rgba(250,244,234,.88)',
+        backdropFilter: 'blur(16px)',
+        borderBottom: '1px solid #e8dfc8',
+        padding: '0 24px',
+        height: '60px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '22px' }}>🇵🇹</span>
+          <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: '18px', color: '#0a1e3c', letterSpacing: '.3px' }}>
+            Português EU
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Link href="/auth/login" style={{ color: '#6d7d8e', fontSize: '14px', fontWeight: 500, textDecoration: 'none', padding: '8px 14px', borderRadius: '10px', transition: 'color .2s' }}>
+            Sign in
+          </Link>
+          <Link href="/auth/signup" style={{
+            background: 'linear-gradient(135deg,#0b3d82,#1a6ec4)',
+            color: '#fff', fontSize: '14px', fontWeight: 600,
+            textDecoration: 'none', padding: '9px 18px',
+            borderRadius: '10px', boxShadow: '0 3px 12px rgba(11,61,130,.25)',
+          }}>
+            Get started →
+          </Link>
+        </div>
+      </nav>
 
-        {/* Hero / next lesson card */}
-        {(() => {
-          const nextLesson = ALL_LESSONS.find(l => !state.lessonProgress[l.id]?.completed) ?? ALL_LESSONS[0];
-          return (
-            <Link
-              href={`/learn/${nextLesson.id}`}
-              className="block no-underline rounded-2xl overflow-hidden mb-8 shadow-hero relative"
-              style={{ background: 'linear-gradient(135deg,#0b3d82 0%,#1a6ec4 100%)' }}
-            >
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 14px),repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 14px)',
-                }}
-              />
-              <div className="relative p-6 flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">
-                    {completedCount === 0 ? 'Start here' : 'Continue learning'}
-                  </div>
-                  <h2 className="font-serif text-2xl text-white mb-1">{nextLesson.title}</h2>
-                  <p className="text-sm text-white/75 max-w-sm leading-relaxed">{nextLesson.theme}</p>
-                  <div className="mt-3 text-xs text-white/60">{nextLesson.number} · 5 new words · 10 exercises</div>
-                </div>
-                <div className="shrink-0 text-5xl">{nextLesson.emoji}</div>
-              </div>
-              <div className="relative px-6 pb-5">
-                <div className="bg-white/15 backdrop-blur-sm border border-white/30 text-white font-semibold text-sm rounded-xl px-5 py-2.5 inline-block hover:bg-white/25 transition-colors">
-                  {completedCount === 0 ? 'Begin Lesson →' : 'Continue →'}
-                </div>
-              </div>
-            </Link>
-          );
-        })()}
+      {/* ── Hero ── */}
+      <section style={{ textAlign: 'center', padding: '80px 24px 72px', position: 'relative', overflow: 'hidden' }}>
+        {/* Subtle radial glow */}
+        <div style={{
+          position: 'absolute', top: '-60px', left: '50%', transform: 'translateX(-50%)',
+          width: '600px', height: '400px', borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(11,61,130,.08) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
 
-        {/* Stats row */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
-          {[
-            { label: 'XP', value: state.xp, sub: 'total points', accent: '#0b3d82' },
-            { label: 'Words', value: totalWords, sub: 'words learned', accent: '#c85830' },
-            { label: 'Lessons', value: completedCount, sub: `of ${ALL_LESSONS.length} done`, accent: '#c98f00' },
-            { label: 'Streak', value: state.streak, sub: 'day streak 🔥', accent: '#e53e2f' },
-          ].map(({ label, value, sub, accent }) => (
-            <div key={label} className="card p-4 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style={{ background: accent }} />
-              <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-1">{label}</div>
-              <div className="font-serif text-2xl font-extrabold text-txt">{value}</div>
-              <div className="text-xs text-txt3 mt-0.5">{sub}</div>
+        <div className="animate-float" style={{ fontSize: '64px', marginBottom: '24px', display: 'inline-block' }}>
+          🇵🇹
+        </div>
+
+        <h1 style={{
+          fontFamily: '"DM Serif Display", serif',
+          fontSize: 'clamp(36px, 6vw, 64px)',
+          color: '#0a1e3c', lineHeight: 1.1,
+          margin: '0 0 20px', letterSpacing: '-.5px',
+        }}>
+          Learn Portuguese<br />
+          <span style={{ color: '#1a6ec4' }}>the European way.</span>
+        </h1>
+
+        <p style={{
+          fontSize: '18px', color: '#6d7d8e', maxWidth: '480px',
+          margin: '0 auto 36px', lineHeight: 1.65, fontWeight: 400,
+        }}>
+          Bite-sized lessons, spaced repetition, and real Portugal culture —
+          built for people who want to actually speak Portuguese in Lisbon.
+        </p>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <Link href="/auth/signup" style={{
+            background: 'linear-gradient(135deg,#0b3d82,#1a6ec4)',
+            color: '#fff', fontWeight: 700, fontSize: '16px',
+            textDecoration: 'none', padding: '14px 28px',
+            borderRadius: '14px', boxShadow: '0 6px 24px rgba(11,61,130,.3)',
+            display: 'inline-block',
+          }}>
+            Start for free →
+          </Link>
+          <Link href="/home" style={{
+            background: '#fff', color: '#0a1e3c', fontWeight: 600, fontSize: '15px',
+            textDecoration: 'none', padding: '14px 24px',
+            borderRadius: '14px', border: '1.5px solid #dbd3c4',
+            display: 'inline-block',
+          }}>
+            Explore as guest
+          </Link>
+        </div>
+
+        {/* Trust strip */}
+        <div style={{ marginTop: '52px', display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap' }}>
+          {['260M Portuguese speakers worldwide', 'European dialect only', 'Free to start'].map(t => (
+            <div key={t} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#6d7d8e', fontSize: '13px' }}>
+              <span style={{ color: '#3d7a58', fontSize: '15px' }}>✓</span>
+              {t}
             </div>
           ))}
         </div>
+      </section>
 
-        {/* SRS review nudge */}
-        {dueCount > 0 && (
-          <Link href="/review" className="block no-underline card p-4 mb-6 border border-terra/30 hover:shadow-hero transition-shadow group flex items-center gap-4">
-            <div className="text-2xl group-hover:animate-float">🔁</div>
-            <div className="flex-1">
-              <span className="font-semibold text-txt">{dueCount} word{dueCount !== 1 ? 's' : ''} due for review</span>
-              <span className="text-txt3 text-sm ml-2">· Keep your streak strong</span>
+      {/* ── Decorative tile divider ── */}
+      <div style={{
+        height: '3px',
+        background: 'repeating-linear-gradient(90deg, #0b3d82 0, #0b3d82 18px, #c85830 18px, #c85830 20px, #faf4ea 20px, #faf4ea 24px)',
+        margin: '0 24px',
+        borderRadius: '2px',
+        opacity: .25,
+      }} />
+
+      {/* ── Features ── */}
+      <section style={{ maxWidth: '900px', margin: '0 auto', padding: '72px 24px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '3px', color: '#c85830', textTransform: 'uppercase', marginBottom: '12px' }}>
+            Why Português EU
+          </div>
+          <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(26px, 4vw, 38px)', color: '#0a1e3c', margin: 0 }}>
+            Not another generic language app
+          </h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+          {features.map((f) => (
+            <div key={f.title} style={{
+              background: '#fff', borderRadius: '18px',
+              border: '1.5px solid #e8dfc8',
+              padding: '28px 22px',
+              boxShadow: '0 4px 20px rgba(10,30,70,.06)',
+              transition: 'transform .2s, box-shadow .2s',
+            }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 10px 36px rgba(10,30,70,.13)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(10,30,70,.06)';
+              }}
+            >
+              <div style={{ fontSize: '30px', marginBottom: '14px' }}>{f.icon}</div>
+              <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: '18px', color: '#0a1e3c', marginBottom: '8px' }}>{f.title}</div>
+              <div style={{ fontSize: '14px', color: '#6d7d8e', lineHeight: 1.6 }}>{f.desc}</div>
             </div>
-            <div className="chip-gold shrink-0">Review →</div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── How it works ── */}
+      <section style={{
+        background: 'linear-gradient(135deg,#0b3d82 0%,#0e4a94 100%)',
+        padding: '72px 24px',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Tile overlay */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,.035) 0,rgba(255,255,255,.035) 1px,transparent 1px,transparent 18px),repeating-linear-gradient(-45deg,rgba(255,255,255,.035) 0,rgba(255,255,255,.035) 1px,transparent 1px,transparent 18px)',
+        }} />
+
+        <div style={{ maxWidth: '760px', margin: '0 auto', position: 'relative' }}>
+          <div style={{ textAlign: 'center', marginBottom: '52px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '3px', color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', marginBottom: '12px' }}>
+              How it works
+            </div>
+            <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(26px, 4vw, 38px)', color: '#fff', margin: 0 }}>
+              Three steps to fluency
+            </h2>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {steps.map((s, i) => (
+              <div key={s.n} style={{ display: 'flex', gap: '22px', alignItems: 'flex-start' }}>
+                <div style={{
+                  width: '48px', height: '48px', borderRadius: '14px', flexShrink: 0,
+                  background: 'rgba(255,255,255,.12)', border: '1.5px solid rgba(255,255,255,.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: '"DM Serif Display", serif', fontSize: '20px', color: '#fff',
+                }}>
+                  {s.n}
+                </div>
+                <div style={{ paddingTop: '4px' }}>
+                  <div style={{ fontWeight: 600, fontSize: '16px', color: '#fff', marginBottom: '5px' }}>{s.title}</div>
+                  <div style={{ fontSize: '14px', color: 'rgba(255,255,255,.6)', lineHeight: 1.6 }}>{s.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Levels teaser ── */}
+      <section style={{ maxWidth: '680px', margin: '0 auto', padding: '72px 24px', textAlign: 'center' }}>
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '3px', color: '#c98f00', textTransform: 'uppercase', marginBottom: '12px' }}>
+            Coming soon
+          </div>
+          <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(24px, 4vw, 34px)', color: '#0a1e3c', margin: '0 0 14px' }}>
+            Choose your starting level
+          </h2>
+          <p style={{ fontSize: '15px', color: '#6d7d8e', lineHeight: 1.65, margin: 0 }}>
+            Whether you're an absolute beginner or already know some basics,
+            you'll be able to jump in at the right point — no wasted time.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Fluent'].map((level, i) => (
+            <div key={level} style={{
+              padding: '8px 18px', borderRadius: '999px', fontSize: '13px', fontWeight: 600,
+              border: '1.5px solid',
+              ...(i === 0
+                ? { background: '#0b3d82', color: '#fff', borderColor: '#0b3d82' }
+                : { background: '#fff', color: '#6d7d8e', borderColor: '#dbd3c4', opacity: .65 }),
+            }}>
+              {level}
+              {i === 0 && ' ← you are here'}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Final CTA ── */}
+      <section style={{ padding: '0 24px 80px', textAlign: 'center' }}>
+        <div style={{
+          maxWidth: '560px', margin: '0 auto',
+          background: 'linear-gradient(135deg,#fff8f0 0%, #fff3d4 100%)',
+          border: '1.5px solid #e8dfc8',
+          borderRadius: '24px', padding: '48px 32px',
+          boxShadow: '0 8px 40px rgba(10,30,70,.08)',
+        }}>
+          <div style={{ fontSize: '40px', marginBottom: '18px' }}>🌊</div>
+          <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: '28px', color: '#0a1e3c', margin: '0 0 12px' }}>
+            Começar é fácil.
+          </h2>
+          <p style={{ fontSize: '14px', color: '#6d7d8e', margin: '0 0 28px', lineHeight: 1.65 }}>
+            Starting is easy. Your first lesson is waiting — no credit card, no commitment.
+          </p>
+          <Link href="/auth/signup" style={{
+            background: 'linear-gradient(135deg,#0b3d82,#1a6ec4)',
+            color: '#fff', fontWeight: 700, fontSize: '15px',
+            textDecoration: 'none', padding: '13px 28px',
+            borderRadius: '13px', boxShadow: '0 5px 20px rgba(11,61,130,.28)',
+            display: 'inline-block',
+          }}>
+            Create your free account →
           </Link>
-        )}
-
-        {/* Lesson path */}
-        <div className="mb-8">
-          <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-4">Your Learning Path</div>
-          <div className="overflow-x-auto pb-2">
-            <div className="flex items-center gap-0 min-w-max px-2">
-              {ALL_LESSONS.map((lesson, i) => (
-                <div key={lesson.id} className="flex items-center">
-                  <LessonCard
-                    lesson={lesson}
-                    status={getLessonStatus(lesson.id)}
-                    stars={state.lessonProgress[lesson.id]?.stars ?? 0}
-                  />
-                  {i < ALL_LESSONS.length - 1 && (
-                    <div className={`w-10 h-1 rounded-full mx-1 ${state.lessonProgress[lesson.id]?.completed ? 'bg-gradient-to-r from-sage to-blu2' : 'bg-brd'}`} />
-                  )}
-                </div>
-              ))}
-            </div>
+          <div style={{ marginTop: '16px' }}>
+            <Link href="/auth/login" style={{ fontSize: '13px', color: '#6d7d8e', textDecoration: 'none' }}>
+              Already have an account? <span style={{ color: '#1a6ec4', fontWeight: 600 }}>Sign in</span>
+            </Link>
           </div>
         </div>
+      </section>
 
-        {/* Culture Trivia CTA */}
-        <Link href="/trivia" className="block no-underline card p-5 mb-8 hover:shadow-hero transition-shadow group">
-          <div className="flex items-center gap-4">
-            <div className="text-3xl group-hover:animate-float">🏰</div>
-            <div className="flex-1">
-              <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-1">Culture Trivia</div>
-              <h3 className="font-serif text-lg text-txt">Test your Portugal knowledge</h3>
-              <p className="text-sm text-txt3 mt-0.5">Fado · Geography · History · Food · Football</p>
-            </div>
-            <div className="chip-gold shrink-0">5 topics</div>
-          </div>
-        </Link>
-
-        {/* Achievements */}
-        <div>
-          <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-4">Achievements</div>
-          <div className="flex flex-wrap gap-2">
-            {ACHIEVEMENTS.map(ach => {
-              const earned = state.earnedAchievements.includes(ach.id);
-              return (
-                <div
-                  key={ach.id}
-                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                    earned
-                      ? 'bg-gold2 border-gold text-gold shadow-sm'
-                      : 'bg-ivory border-brd text-txt3 opacity-50 grayscale'
-                  }`}
-                  title={ach.desc}
-                >
-                  <span>{ach.emoji}</span>
-                  <span>{ach.name}</span>
-                </div>
-              );
-            })}
-          </div>
+      {/* ── Footer ── */}
+      <footer style={{
+        borderTop: '1px solid #e8dfc8',
+        padding: '24px',
+        textAlign: 'center',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+          <span style={{ fontSize: '16px' }}>🇵🇹</span>
+          <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: '15px', color: '#0a1e3c' }}>Português EU</span>
         </div>
-      </main>
+        <p style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>European Portuguese · For everyone · Free to start</p>
+      </footer>
+
     </div>
   );
 }
