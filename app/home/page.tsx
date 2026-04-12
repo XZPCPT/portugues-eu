@@ -63,7 +63,7 @@ export default function HomePage() {
             <Link
               href={`/learn/${nextLesson.id}`}
               className="block no-underline rounded-2xl overflow-hidden mb-8 shadow-hero relative"
-              style={{ background: 'linear-gradient(135deg,#0b3d82 0%,#1a6ec4 100%)' }}
+              style={{ background: 'linear-gradient(135deg,#1A3B9E 0%,#2E52C4 100%)' }}
             >
               <div
                 className="absolute inset-0 pointer-events-none"
@@ -94,9 +94,9 @@ export default function HomePage() {
         {/* Stats row */}
         <div className="grid grid-cols-4 gap-3 mb-8">
           {[
-            { label: 'XP', value: state.xp, sub: 'total points', accent: '#0b3d82' },
-            { label: 'Words', value: totalWords, sub: 'words learned', accent: '#c85830' },
-            { label: 'Lessons', value: completedCount, sub: `of ${ALL_LESSONS.length} done`, accent: '#c98f00' },
+            { label: 'XP', value: state.xp, sub: 'total points', accent: '#1A3B9E' },
+            { label: 'Words', value: totalWords, sub: 'words learned', accent: '#BF4F2A' },
+            { label: 'Lessons', value: completedCount, sub: `of ${ALL_LESSONS.length} done`, accent: '#C49A2E' },
             { label: 'Streak', value: state.streak, sub: 'day streak 🔥', accent: '#e53e2f' },
           ].map(({ label, value, sub, accent }) => (
             <div key={label} className="card p-4 relative overflow-hidden">

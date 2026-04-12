@@ -1,25 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --blu: #0b3d82;
-  --blu2: #1a6ec4;
-  --blu3: #85bcee;
-  --blu4: #dff0ff;
-  --cream: #faf4ea;
-  --ivory: #fffdf5;
-  --gold: #c98f00;
-  --gold2: #fff3c8;
-  --terra: #c85830;
-  --sage: #3d7a58;
-  --sage2: #e2f5ea;
-  --txt: #0a1e3c;
-  --txt2: #253448;
-  --txt3: #6d7d8e;
-  --brd: #dbd3c4;
+  --blu: #1A3B9E;
+  --blu2: #2E52C4;
+  --blu3: #6B84D8;
+  --blu4: #EBF0FF;
+  --cream: #FAF7F2;
+  --ivory: #FDFCF9;
+  --gold: #C49A2E;
+  --gold2: #FBF3DC;
+  --terra: #BF4F2A;
+  --sage: #3A7D5C;
+  --sage2: #E6F4ED;
+  --txt: #0F1C3F;
+  --txt2: #3D4F6B;
+  --txt3: #8896A8;
+  --brd: #E2D9CE;
 }
 
 @layer base {
@@ -30,9 +30,9 @@
     scroll-behavior: smooth;
   }
   body {
-    font-family: 'Inter', sans-serif;
-    background-color: #faf4ea;
-    color: #0a1e3c;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background-color: #FAF7F2;
+    color: #0F1C3F;
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -56,14 +56,14 @@
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 2px;
-    background: linear-gradient(90deg, #e53e2f, #c98f00, #c85830, #e53e2f);
+    background: linear-gradient(90deg, #e53e2f, #C49A2E, #BF4F2A, #e53e2f);
     background-size: 200% 100%;
     animation: gradShift 4s ease infinite;
   }
 
   /* ── Progress shimmer fill ── */
   .progress-shimmer {
-    background: linear-gradient(90deg, #0b3d82, #1a6ec4, #c98f00);
+    background: linear-gradient(90deg, #1A3B9E, #2E52C4, #C49A2E);
     background-size: 200% 100%;
     animation: shimmer 3s linear infinite;
   }
@@ -119,6 +119,6 @@
 }
 
 @keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(11,61,130,.15); }
-  50%       { box-shadow: 0 0 0 8px rgba(11,61,130,.06); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(26,59,158,.15); }
+  50%       { box-shadow: 0 0 0 8px rgba(26,59,158,.06); }
 }

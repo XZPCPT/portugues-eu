@@ -17,7 +17,7 @@ export default function Navbar({ xp = 0, hearts = 5, streak = 0, reviewCount = 0
     <header
       className="sticky top-0 z-50 tile-pattern relative overflow-hidden"
       style={{
-        background: 'linear-gradient(105deg,#0b3d82 0%,#1055a8 50%,#0e4a94 100%)',
+        background: 'linear-gradient(105deg,#1A3B9E 0%,#2E52C4 50%,#1A3B9E 100%)',
         height: '64px',
         display: 'flex',
         alignItems: 'center',

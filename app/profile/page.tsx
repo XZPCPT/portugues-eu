@@ -95,9 +95,9 @@ export default function ProfilePage() {
         {/* Stats grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           {[
-            { label: 'Total XP', value: progress.xp, emoji: '⚡', accent: '#0b3d82' },
-            { label: 'Words Learned', value: totalWords, emoji: '📖', accent: '#c85830' },
-            { label: 'Lessons Done', value: `${completedCount} / ${ALL_LESSONS.length}`, emoji: '🎓', accent: '#c98f00' },
+            { label: 'Total XP', value: progress.xp, emoji: '⚡', accent: '#1A3B9E' },
+            { label: 'Words Learned', value: totalWords, emoji: '📖', accent: '#BF4F2A' },
+            { label: 'Lessons Done', value: `${completedCount} / ${ALL_LESSONS.length}`, emoji: '🎓', accent: '#C49A2E' },
             { label: 'Stars Earned', value: `${earnedStars} / ${maxStars || completedCount * 3}`, emoji: '⭐', accent: '#e07b39' },
           ].map(({ label, value, emoji, accent }) => (
             <div key={label} className="card p-4 relative overflow-hidden">

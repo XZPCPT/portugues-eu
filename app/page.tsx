@@ -51,28 +51,28 @@ export default function LandingPage() {
       {/* ── Topnav ── */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(250,244,234,.88)',
+        background: 'rgba(250,247,242,.88)',
         backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid #e8dfc8',
+        borderBottom: '1px solid #E2D9CE',
         padding: '0 24px',
         height: '60px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '22px' }}>🇵🇹</span>
-          <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: '18px', color: '#0a1e3c', letterSpacing: '.3px' }}>
+          <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: '18px', color: '#0F1C3F', letterSpacing: '.3px' }}>
             Português EU
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Link href="/auth/login" style={{ color: '#6d7d8e', fontSize: '14px', fontWeight: 500, textDecoration: 'none', padding: '8px 14px', borderRadius: '10px', transition: 'color .2s' }}>
+          <Link href="/auth/login" style={{ color: '#8896A8', fontSize: '14px', fontWeight: 500, textDecoration: 'none', padding: '8px 14px', borderRadius: '10px', transition: 'color .2s' }}>
             Sign in
           </Link>
           <Link href="/auth/signup" style={{
-            background: 'linear-gradient(135deg,#0b3d82,#1a6ec4)',
+            background: 'linear-gradient(135deg,#1A3B9E,#2E52C4)',
             color: '#fff', fontSize: '14px', fontWeight: 600,
             textDecoration: 'none', padding: '9px 18px',
-            borderRadius: '10px', boxShadow: '0 3px 12px rgba(11,61,130,.25)',
+            borderRadius: '10px', boxShadow: '0 3px 12px rgba(26,59,158,.25)',
           }}>
             Get started →
           </Link>
@@ -85,7 +85,7 @@ export default function LandingPage() {
         <div style={{
           position: 'absolute', top: '-60px', left: '50%', transform: 'translateX(-50%)',
           width: '600px', height: '400px', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(11,61,130,.08) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse, rgba(26,59,158,.08) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -94,17 +94,17 @@ export default function LandingPage() {
         </div>
 
         <h1 style={{
-          fontFamily: '"DM Serif Display", serif',
+          fontFamily: '"Fraunces", Georgia, serif',
           fontSize: 'clamp(36px, 6vw, 64px)',
-          color: '#0a1e3c', lineHeight: 1.1,
+          color: '#0F1C3F', lineHeight: 1.1,
           margin: '0 0 20px', letterSpacing: '-.5px',
         }}>
           Learn Portuguese<br />
-          <span style={{ color: '#1a6ec4' }}>the European way.</span>
+          <span style={{ color: '#2E52C4' }}>the European way.</span>
         </h1>
 
         <p style={{
-          fontSize: '18px', color: '#6d7d8e', maxWidth: '480px',
+          fontSize: '18px', color: '#8896A8', maxWidth: '480px',
           margin: '0 auto 36px', lineHeight: 1.65, fontWeight: 400,
         }}>
           Bite-sized lessons, spaced repetition, and real Portugal culture —
@@ -113,18 +113,18 @@ export default function LandingPage() {
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <Link href="/auth/signup" style={{
-            background: 'linear-gradient(135deg,#0b3d82,#1a6ec4)',
+            background: 'linear-gradient(135deg,#1A3B9E,#2E52C4)',
             color: '#fff', fontWeight: 700, fontSize: '16px',
             textDecoration: 'none', padding: '14px 28px',
-            borderRadius: '14px', boxShadow: '0 6px 24px rgba(11,61,130,.3)',
+            borderRadius: '14px', boxShadow: '0 6px 24px rgba(26,59,158,.3)',
             display: 'inline-block',
           }}>
             Start for free →
           </Link>
           <Link href="/home" style={{
-            background: '#fff', color: '#0a1e3c', fontWeight: 600, fontSize: '15px',
+            background: '#fff', color: '#0F1C3F', fontWeight: 600, fontSize: '15px',
             textDecoration: 'none', padding: '14px 24px',
-            borderRadius: '14px', border: '1.5px solid #dbd3c4',
+            borderRadius: '14px', border: '1.5px solid #E2D9CE',
             display: 'inline-block',
           }}>
             Explore as guest
@@ -134,8 +134,8 @@ export default function LandingPage() {
         {/* Trust strip */}
         <div style={{ marginTop: '52px', display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap' }}>
           {['260M Portuguese speakers worldwide', 'European dialect only', 'Free to start'].map(t => (
-            <div key={t} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#6d7d8e', fontSize: '13px' }}>
-              <span style={{ color: '#3d7a58', fontSize: '15px' }}>✓</span>
+            <div key={t} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#8896A8', fontSize: '13px' }}>
+              <span style={{ color: '#3A7D5C', fontSize: '15px' }}>✓</span>
               {t}
             </div>
           ))}
@@ -145,7 +145,7 @@ export default function LandingPage() {
       {/* ── Decorative tile divider ── */}
       <div style={{
         height: '3px',
-        background: 'repeating-linear-gradient(90deg, #0b3d82 0, #0b3d82 18px, #c85830 18px, #c85830 20px, #faf4ea 20px, #faf4ea 24px)',
+        background: 'repeating-linear-gradient(90deg, #1A3B9E 0, #1A3B9E 18px, #BF4F2A 18px, #BF4F2A 20px, #FAF7F2 20px, #FAF7F2 24px)',
         margin: '0 24px',
         borderRadius: '2px',
         opacity: .25,
@@ -154,10 +154,10 @@ export default function LandingPage() {
       {/* ── Features ── */}
       <section style={{ maxWidth: '900px', margin: '0 auto', padding: '72px 24px' }}>
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '3px', color: '#c85830', textTransform: 'uppercase', marginBottom: '12px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '3px', color: '#BF4F2A', textTransform: 'uppercase', marginBottom: '12px' }}>
             Why Português EU
           </div>
-          <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(26px, 4vw, 38px)', color: '#0a1e3c', margin: 0 }}>
+          <h2 style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 'clamp(26px, 4vw, 38px)', color: '#0F1C3F', margin: 0 }}>
             Not another generic language app
           </h2>
         </div>
@@ -166,23 +166,23 @@ export default function LandingPage() {
           {features.map((f) => (
             <div key={f.title} style={{
               background: '#fff', borderRadius: '18px',
-              border: '1.5px solid #e8dfc8',
+              border: '1.5px solid #E2D9CE',
               padding: '28px 22px',
-              boxShadow: '0 4px 20px rgba(10,30,70,.06)',
+              boxShadow: '0 4px 20px rgba(15,28,63,.06)',
               transition: 'transform .2s, box-shadow .2s',
             }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 10px 36px rgba(10,30,70,.13)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 10px 36px rgba(15,28,63,.13)';
               }}
               onMouseLeave={e => {
                 (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(10,30,70,.06)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(15,28,63,.06)';
               }}
             >
               <div style={{ fontSize: '30px', marginBottom: '14px' }}>{f.icon}</div>
-              <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: '18px', color: '#0a1e3c', marginBottom: '8px' }}>{f.title}</div>
-              <div style={{ fontSize: '14px', color: '#6d7d8e', lineHeight: 1.6 }}>{f.desc}</div>
+              <div style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: '18px', color: '#0F1C3F', marginBottom: '8px' }}>{f.title}</div>
+              <div style={{ fontSize: '14px', color: '#8896A8', lineHeight: 1.6 }}>{f.desc}</div>
             </div>
           ))}
         </div>
@@ -190,7 +190,7 @@ export default function LandingPage() {
 
       {/* ── How it works ── */}
       <section style={{
-        background: 'linear-gradient(135deg,#0b3d82 0%,#0e4a94 100%)',
+        background: 'linear-gradient(135deg,#1A3B9E 0%,#1A3B9E 100%)',
         padding: '72px 24px',
         position: 'relative', overflow: 'hidden',
       }}>
@@ -205,7 +205,7 @@ export default function LandingPage() {
             <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '3px', color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', marginBottom: '12px' }}>
               How it works
             </div>
-            <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(26px, 4vw, 38px)', color: '#fff', margin: 0 }}>
+            <h2 style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 'clamp(26px, 4vw, 38px)', color: '#fff', margin: 0 }}>
               Three steps to fluency
             </h2>
           </div>
@@ -217,7 +217,7 @@ export default function LandingPage() {
                   width: '48px', height: '48px', borderRadius: '14px', flexShrink: 0,
                   background: 'rgba(255,255,255,.12)', border: '1.5px solid rgba(255,255,255,.2)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: '"DM Serif Display", serif', fontSize: '20px', color: '#fff',
+                  fontFamily: '"Fraunces", Georgia, serif', fontSize: '20px', color: '#fff',
                 }}>
                   {s.n}
                 </div>
@@ -234,13 +234,13 @@ export default function LandingPage() {
       {/* ── Levels teaser ── */}
       <section style={{ maxWidth: '680px', margin: '0 auto', padding: '72px 24px', textAlign: 'center' }}>
         <div style={{ marginBottom: '32px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '3px', color: '#c98f00', textTransform: 'uppercase', marginBottom: '12px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '3px', color: '#C49A2E', textTransform: 'uppercase', marginBottom: '12px' }}>
             Coming soon
           </div>
-          <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(24px, 4vw, 34px)', color: '#0a1e3c', margin: '0 0 14px' }}>
+          <h2 style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 'clamp(24px, 4vw, 34px)', color: '#0F1C3F', margin: '0 0 14px' }}>
             Choose your starting level
           </h2>
-          <p style={{ fontSize: '15px', color: '#6d7d8e', lineHeight: 1.65, margin: 0 }}>
+          <p style={{ fontSize: '15px', color: '#8896A8', lineHeight: 1.65, margin: 0 }}>
             Whether you're an absolute beginner or already know some basics,
             you'll be able to jump in at the right point — no wasted time.
           </p>
@@ -252,8 +252,8 @@ export default function LandingPage() {
               padding: '8px 18px', borderRadius: '999px', fontSize: '13px', fontWeight: 600,
               border: '1.5px solid',
               ...(i === 0
-                ? { background: '#0b3d82', color: '#fff', borderColor: '#0b3d82' }
-                : { background: '#fff', color: '#6d7d8e', borderColor: '#dbd3c4', opacity: .65 }),
+                ? { background: '#1A3B9E', color: '#fff', borderColor: '#1A3B9E' }
+                : { background: '#fff', color: '#8896A8', borderColor: '#E2D9CE', opacity: .65 }),
             }}>
               {level}
               {i === 0 && ' ← you are here'}
@@ -267,29 +267,29 @@ export default function LandingPage() {
         <div style={{
           maxWidth: '560px', margin: '0 auto',
           background: 'linear-gradient(135deg,#fff8f0 0%, #fff3d4 100%)',
-          border: '1.5px solid #e8dfc8',
+          border: '1.5px solid #E2D9CE',
           borderRadius: '24px', padding: '48px 32px',
-          boxShadow: '0 8px 40px rgba(10,30,70,.08)',
+          boxShadow: '0 8px 40px rgba(15,28,63,.08)',
         }}>
           <div style={{ fontSize: '40px', marginBottom: '18px' }}>🌊</div>
-          <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: '28px', color: '#0a1e3c', margin: '0 0 12px' }}>
+          <h2 style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: '28px', color: '#0F1C3F', margin: '0 0 12px' }}>
             Começar é fácil.
           </h2>
-          <p style={{ fontSize: '14px', color: '#6d7d8e', margin: '0 0 28px', lineHeight: 1.65 }}>
+          <p style={{ fontSize: '14px', color: '#8896A8', margin: '0 0 28px', lineHeight: 1.65 }}>
             Starting is easy. Your first lesson is waiting — no credit card, no commitment.
           </p>
           <Link href="/auth/signup" style={{
-            background: 'linear-gradient(135deg,#0b3d82,#1a6ec4)',
+            background: 'linear-gradient(135deg,#1A3B9E,#2E52C4)',
             color: '#fff', fontWeight: 700, fontSize: '15px',
             textDecoration: 'none', padding: '13px 28px',
-            borderRadius: '13px', boxShadow: '0 5px 20px rgba(11,61,130,.28)',
+            borderRadius: '13px', boxShadow: '0 5px 20px rgba(26,59,158,.28)',
             display: 'inline-block',
           }}>
             Create your free account →
           </Link>
           <div style={{ marginTop: '16px' }}>
-            <Link href="/auth/login" style={{ fontSize: '13px', color: '#6d7d8e', textDecoration: 'none' }}>
-              Already have an account? <span style={{ color: '#1a6ec4', fontWeight: 600 }}>Sign in</span>
+            <Link href="/auth/login" style={{ fontSize: '13px', color: '#8896A8', textDecoration: 'none' }}>
+              Already have an account? <span style={{ color: '#2E52C4', fontWeight: 600 }}>Sign in</span>
             </Link>
           </div>
         </div>
@@ -297,13 +297,13 @@ export default function LandingPage() {
 
       {/* ── Footer ── */}
       <footer style={{
-        borderTop: '1px solid #e8dfc8',
+        borderTop: '1px solid #E2D9CE',
         padding: '24px',
         textAlign: 'center',
       }}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
           <span style={{ fontSize: '16px' }}>🇵🇹</span>
-          <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: '15px', color: '#0a1e3c' }}>Português EU</span>
+          <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: '15px', color: '#0F1C3F' }}>Português EU</span>
         </div>
         <p style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>European Portuguese · For everyone · Free to start</p>
       </footer>
