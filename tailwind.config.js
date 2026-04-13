@@ -27,8 +27,8 @@ module.exports = {
         brd:    '#E2D9CE',
       },
       fontFamily: {
-        serif: ['var(--font-fraunces)', 'Georgia', 'serif'],
-        sans:  ['var(--font-dm-sans)', 'system-ui', 'sans-serif'],
+        serif: ['"Fraunces"', 'Georgia', 'serif'],
+        sans:  ['"DM Sans"', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         DEFAULT: '16px',
