@@ -46,7 +46,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: '#ff0000' }}>
+    <div className="min-h-screen bg-cream overflow-x-hidden">
 
       {/* ── Topnav ── */}
       <nav style={{
