@@ -63,12 +63,12 @@ export default function HomePage() {
             <Link
               href={`/learn/${nextLesson.id}`}
               className="block no-underline rounded-2xl overflow-hidden mb-8 shadow-hero relative"
-              style={{ background: 'linear-gradient(135deg,#1A3B9E 0%,#2E52C4 100%)' }}
+              style={{ background: '#0F1C3F' }}
             >
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 14px),repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 14px)',
+                  backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'t\' x=\'0\' y=\'0\' width=\'40\' height=\'40\' patternUnits=\'userSpaceOnUse\'%3E%3Crect x=\'1\' y=\'1\' width=\'38\' height=\'38\' fill=\'none\' stroke=\'white\' stroke-width=\'0.5\' stroke-opacity=\'0.06\'/%3E%3Ccircle cx=\'10\' cy=\'10\' r=\'4\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3Ccircle cx=\'30\' cy=\'10\' r=\'4\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3Ccircle cx=\'10\' cy=\'30\' r=\'4\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3Ccircle cx=\'30\' cy=\'30\' r=\'4\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3Cpolygon points=\'20,16 24,20 20,24 16,20\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23t)\'/%3E%3C/svg%3E")',
                 }}
               />
               <div className="relative p-6 flex items-center justify-between gap-4">

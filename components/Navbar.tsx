@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 interface NavbarProps {
@@ -14,69 +15,74 @@ export default function Navbar({ xp = 0, hearts = 5, streak = 0, reviewCount = 0
   const pathname = usePathname();
 
   return (
-    <header
-      className="sticky top-0 z-50 tile-pattern relative overflow-hidden"
-      style={{
-        background: 'linear-gradient(105deg,#1A3B9E 0%,#2E52C4 50%,#1A3B9E 100%)',
-        height: '64px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 20px',
-        boxShadow: '0 3px 20px rgba(10,30,80,.35)',
-      }}
-    >
-      {/* Logo */}
-      <Link href="/home" className="flex items-center gap-2.5 no-underline group">
-        <span className="text-2xl group-hover:animate-float">🇵🇹</span>
-        <div>
-          <div className="font-serif text-white text-lg leading-tight">Português EU</div>
-          <div className="text-xs text-white/50 tracking-widest uppercase">A1 · European Portuguese</div>
-        </div>
-      </Link>
+    <header className="sticky top-0 z-50" style={{
+      background: '#0F1C3F',
+      borderBottom: '1px solid rgba(255,255,255,.07)',
+      boxShadow: '0 4px 32px rgba(0,0,0,.3)',
+    }}>
+      <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between gap-4">
 
-      {/* Right side */}
-      <div className="flex items-center gap-2">
-        {/* SRS review badge */}
-        {reviewCount > 0 && (
-          <Link href="/review" className="flex items-center gap-1.5 bg-terra/80 hover:bg-terra border border-white/20 rounded-full px-3 py-1.5 text-white text-sm font-semibold no-underline transition-colors">
-            <span>🔁</span>
-            <span>{reviewCount}</span>
-          </Link>
-        )}
-
-        {/* Streak */}
-        {streak > 0 && (
-          <div className="flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1.5 text-white text-sm font-semibold">
-            <span>🔥</span>
-            <span>{streak}</span>
-          </div>
-        )}
-
-        {/* Hearts */}
-        <div className="flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1.5 text-white text-sm font-semibold">
-          <span>❤️</span>
-          <span>{hearts}</span>
-        </div>
-
-        {/* XP */}
-        <div className="flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1.5 text-white text-sm font-semibold">
-          <span>⚡</span>
-          <span>{xp} XP</span>
-        </div>
-
-        {/* Profile */}
-        <Link
-          href="/profile"
-          className={`flex items-center justify-center w-8 h-8 rounded-full border-2 no-underline transition-colors ${
-            pathname === '/profile'
-              ? 'bg-white/30 border-white'
-              : 'bg-white/10 border-white/30 hover:bg-white/20'
-          }`}
-          title="Profile"
-        >
-          <span className="text-base">👤</span>
+        {/* Logo wordmark */}
+        <Link href="/home" className="flex items-center no-underline shrink-0 group">
+          <Image
+            src="/brand/wordmark-dark.png"
+            alt="Português EU"
+            width={160}
+            height={44}
+            style={{ height: '32px', width: 'auto', objectFit: 'contain', opacity: 1, transition: 'opacity .2s' }}
+            priority
+          />
         </Link>
+
+        {/* Right side */}
+        <div className="flex items-center gap-2">
+
+          {reviewCount > 0 && (
+            <Link href="/review" className="no-underline flex items-center gap-1.5 text-sm font-medium transition-all" style={{
+              background: 'rgba(191,79,42,.85)',
+              border: '1px solid rgba(255,255,255,.1)',
+              borderRadius: '8px', padding: '5px 13px', color: '#fff',
+            }}>
+              <span style={{ fontSize: '13px' }}>↺</span>
+              <span>{reviewCount} due</span>
+            </Link>
+          )}
+
+          {streak > 0 && (
+            <div className="flex items-center gap-1.5 text-sm font-medium" style={{
+              background: 'rgba(255,255,255,.06)',
+              border: '1px solid rgba(255,255,255,.09)',
+              borderRadius: '8px', padding: '5px 13px', color: 'rgba(255,255,255,.75)',
+            }}>
+              <span>🔥</span><span>{streak}</span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-1.5 text-sm font-medium" style={{
+            background: 'rgba(255,255,255,.06)',
+            border: '1px solid rgba(255,255,255,.09)',
+            borderRadius: '8px', padding: '5px 13px', color: 'rgba(255,255,255,.75)',
+          }}>
+            <span style={{ color: '#e57373', fontSize: '12px' }}>♥</span><span>{hearts}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-sm font-medium" style={{
+            background: 'rgba(196,154,46,.1)',
+            border: '1px solid rgba(196,154,46,.25)',
+            borderRadius: '8px', padding: '5px 13px', color: '#C49A2E',
+          }}>
+            <span>⚡</span><span>{xp} XP</span>
+          </div>
+
+          <Link href="/profile" className="no-underline flex items-center justify-center text-base transition-all" style={{
+            width: '34px', height: '34px', borderRadius: '8px',
+            background: pathname === '/profile' ? 'rgba(255,255,255,.15)' : 'rgba(255,255,255,.06)',
+            border: '1px solid rgba(255,255,255,.1)',
+            color: 'rgba(255,255,255,.65)',
+          }} title="Profile">
+            ◉
+          </Link>
+        </div>
       </div>
     </header>
   );
