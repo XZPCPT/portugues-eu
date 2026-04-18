@@ -21,12 +21,8 @@
 }
 
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
-  html {
-    scroll-behavior: smooth;
-  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     font-family: 'DM Sans', system-ui, sans-serif;
     background-color: #FAF7F2;
@@ -34,36 +30,50 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Fraunces', Georgia, serif;
+  }
 }
 
 @layer components {
-  /* ── Tile pattern overlay (Portugal azulejo vibe) ── */
-  .tile-pattern::before {
+
+  /* ── Patterns ── */
+  .pattern-azulejo {
+    background-image: url('/brand/azulejo-pattern.svg');
+    background-size: 180px 180px;
+    background-repeat: repeat;
+  }
+
+  .pattern-calcada {
+    background-image: url('/brand/calcada-blobs.svg');
+    background-size: 220px auto;
+    background-repeat: repeat;
+  }
+
+  /* ── Dark azulejo card (section 5 / hero) ── */
+  .card-dark {
+    background-color: #0F1C3F;
+    background-image: url('/brand/azulejo-pattern.svg');
+    background-size: 180px 180px;
+    background-repeat: repeat;
+    position: relative;
+  }
+  .card-dark::after {
     content: '';
     position: absolute;
     inset: 0;
-    background-image:
-      repeating-linear-gradient(45deg, rgba(255,255,255,.055) 0, rgba(255,255,255,.055) 1px, transparent 1px, transparent 16px),
-      repeating-linear-gradient(-45deg, rgba(255,255,255,.055) 0, rgba(255,255,255,.055) 1px, transparent 1px, transparent 16px);
+    background: linear-gradient(to bottom, rgba(15,28,63,.55) 0%, rgba(15,28,63,.85) 100%);
+    border-radius: inherit;
     pointer-events: none;
   }
+  .card-dark > * { position: relative; z-index: 1; }
 
-  /* ── Animated gradient bar ── */
-  .grad-bar::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #e53e2f, #C49A2E, #BF4F2A, #e53e2f);
-    background-size: 200% 100%;
-    animation: gradShift 4s ease infinite;
-  }
-
-  /* ── Progress shimmer fill ── */
-  .progress-shimmer {
-    background: linear-gradient(90deg, #1A3B9E, #2E52C4, #C49A2E);
-    background-size: 200% 100%;
-    animation: shimmer 3s linear infinite;
+  /* ── Active lesson card (calcada blob bg) ── */
+  .card-active {
+    background-color: #FDFCF9;
+    background-image: url('/brand/calcada-blobs.svg');
+    background-size: 220px auto;
+    background-repeat: repeat;
   }
 
   /* ── Card base ── */
@@ -71,21 +81,128 @@
     @apply bg-ivory border border-brd rounded-2xl shadow-card;
   }
 
-  /* ── Button primary ── */
+  /* ── 3D press button — primary ── */
   .btn-primary {
-    @apply bg-blu text-white font-semibold rounded-xl px-5 py-3 transition-all duration-200
-           hover:bg-blu2 active:scale-95;
+    @apply bg-blu text-white font-semibold rounded-2xl px-6 py-3
+           border-b-4 border-[#0F1C3F]
+           active:border-b-0 active:translate-y-1
+           transition-all duration-100;
   }
 
-  /* ── Button secondary ── */
+  /* ── 3D press button — secondary ── */
   .btn-secondary {
-    @apply bg-ivory text-txt2 font-semibold rounded-xl px-5 py-3 border border-brd
-           transition-all duration-200 hover:border-blu2 hover:text-blu;
+    @apply bg-ivory text-txt font-semibold rounded-2xl px-5 py-3
+           border border-brd border-b-4 border-b-[#C8BFB5]
+           active:border-b-0 active:translate-y-1
+           hover:border-blu hover:text-blu
+           transition-all duration-100;
+  }
+
+  /* ── 3D press button — success ── */
+  .btn-success {
+    @apply bg-sage text-white font-semibold rounded-2xl px-6 py-3
+           border-b-4 border-[#1E4A34]
+           active:border-b-0 active:translate-y-1
+           transition-all duration-100;
+  }
+
+  /* ── 3D press button — danger ── */
+  .btn-danger {
+    @apply bg-terra text-white font-semibold rounded-2xl px-6 py-3
+           border-b-4 border-[#7A3118]
+           active:border-b-0 active:translate-y-1
+           transition-all duration-100;
   }
 
   /* ── Gold accent chip ── */
   .chip-gold {
     @apply bg-gold2 border border-gold text-gold text-xs font-bold px-3 py-1 rounded-full;
+  }
+
+  /* ── Stat pills (navbar) ── */
+  .stat-pill {
+    @apply flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.8);
+  }
+
+  /* ── Progress bar ── */
+  .progress-track {
+    @apply w-full h-2 rounded-full overflow-hidden;
+    background: #E2D9CE;
+  }
+  .progress-fill {
+    @apply h-full rounded-full relative;
+    background: linear-gradient(90deg, #1A3B9E, #2E52C4);
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 2rem;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,.3));
+  }
+
+  /* ── Lesson node states ── */
+  .node-completed {
+    @apply w-16 h-16 rounded-full flex items-center justify-center text-white shadow-md
+           border-b-4 border-[#1E4A34]
+           active:border-b-0 active:translate-y-1 transition-all hover:scale-105;
+    background: #3A7D5C;
+  }
+  .node-active {
+    @apply w-20 h-20 rounded-full flex items-center justify-center text-white shadow-lg
+           border-b-[6px] border-[#0F1C3F]
+           active:border-b-0 active:translate-y-1.5 transition-all hover:scale-105
+           ring-4;
+    background: #1A3B9E;
+    ring-color: rgba(26,59,158,.2);
+  }
+  .node-locked {
+    @apply w-16 h-16 rounded-full flex items-center justify-center cursor-not-allowed;
+    background: #E2D9CE;
+    border-bottom: 4px solid #C8BFB5;
+    color: #8896A8;
+  }
+
+  /* ── Quiz option states ── */
+  .quiz-option {
+    @apply bg-ivory border border-brd/50 rounded-xl p-4 flex items-center cursor-pointer
+           border-b-4 border-b-[#C8BFB5]
+           active:border-b-0 active:translate-y-1 transition-all;
+  }
+  .quiz-option-correct {
+    @apply rounded-xl p-4 flex items-center border-b-4 border-b-[#1E4A34] transition-all;
+    background: rgba(58,125,92,.1);
+    border-color: #3A7D5C;
+  }
+  .quiz-option-wrong {
+    @apply rounded-xl p-4 flex items-center border-b-4 border-b-[#7A3118] transition-all;
+    background: rgba(191,79,42,.1);
+    border-color: #BF4F2A;
+  }
+
+  /* ── Toast styles ── */
+  .toast-success {
+    @apply rounded-xl p-4 flex items-center gap-3 text-sm font-medium;
+    background: #E6F4ED; border: 1px solid rgba(58,125,92,.2); color: #3A7D5C;
+  }
+  .toast-error {
+    @apply rounded-xl p-4 flex items-center gap-3 text-sm font-medium;
+    background: #FBE9E3; border: 1px solid rgba(191,79,42,.2); color: #BF4F2A;
+  }
+  .toast-info {
+    @apply rounded-xl p-4 flex items-center gap-3 text-sm font-medium;
+    background: #EBF0FF; border: 1px solid rgba(26,59,158,.15); color: #1A3B9E;
+  }
+
+  /* ── Animated gradient strip ── */
+  .grad-strip {
+    height: 4px;
+    background: linear-gradient(90deg, #1A3B9E, #BF4F2A, #C49A2E, #3A7D5C, #1A3B9E);
+    background-size: 300% 100%;
+    animation: gradShift 6s ease infinite;
   }
 }
 
@@ -94,28 +211,23 @@
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-
 @keyframes shimmer {
   0%   { background-position: -400% 0; }
   100% { background-position: 400% 0; }
 }
-
 @keyframes floatIcon {
   0%, 100% { transform: translateY(0) rotate(-3deg); }
   50%       { transform: translateY(-10px) rotate(3deg); }
 }
-
 @keyframes popIn {
   0%   { transform: scale(.4); opacity: 0; }
   65%  { transform: scale(1.12); }
   100% { transform: scale(1); opacity: 1; }
 }
-
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes glowPulse {
   0%, 100% { box-shadow: 0 0 0 3px rgba(26,59,158,.15); }
   50%       { box-shadow: 0 0 0 8px rgba(26,59,158,.06); }

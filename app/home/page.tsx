@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import LessonCard from '@/components/LessonCard';
 import { ALL_LESSONS, ACHIEVEMENTS } from '@/data/all-lessons';
@@ -11,7 +10,6 @@ import { countDue } from '@/lib/srs';
 import { createClient } from '@/lib/supabase';
 
 export default function HomePage() {
-  const router = useRouter();
   const [state, setState] = useState<ProgressState>(defaultProgress);
   const [greeting, setGreeting] = useState('');
 
@@ -19,8 +17,6 @@ export default function HomePage() {
     const init = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-
-      // Build gender-aware greeting
       if (user) {
         const gender = user.user_metadata?.gender as string | undefined;
         const name = user.user_metadata?.full_name as string | undefined;
@@ -45,84 +41,77 @@ export default function HomePage() {
     return 'locked';
   };
 
+  const nextLesson = ALL_LESSONS.find(l => !state.lessonProgress[l.id]?.completed) ?? ALL_LESSONS[0];
+
   return (
     <div className="min-h-screen bg-cream">
       <Navbar xp={state.xp} hearts={state.hearts} streak={state.streak} reviewCount={dueCount} />
 
-      <main className="max-w-3xl mx-auto px-4 py-8 pb-20">
+      <main className="max-w-3xl mx-auto px-4 py-8 pb-24">
 
-        {/* Gender-aware welcome */}
+        {/* Greeting */}
         {greeting && (
-          <p className="font-serif text-xl text-txt mb-6 animate-slide-up">{greeting}</p>
+          <p className="font-serif text-2xl text-txt mb-6 animate-slide-up italic">{greeting}</p>
         )}
 
-        {/* Hero / next lesson card */}
-        {(() => {
-          const nextLesson = ALL_LESSONS.find(l => !state.lessonProgress[l.id]?.completed) ?? ALL_LESSONS[0];
-          return (
-            <Link
-              href={`/learn/${nextLesson.id}`}
-              className="block no-underline rounded-2xl overflow-hidden mb-8 shadow-hero relative"
-              style={{ background: '#0F1C3F' }}
-            >
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'t\' x=\'0\' y=\'0\' width=\'40\' height=\'40\' patternUnits=\'userSpaceOnUse\'%3E%3Crect x=\'1\' y=\'1\' width=\'38\' height=\'38\' fill=\'none\' stroke=\'white\' stroke-width=\'0.5\' stroke-opacity=\'0.06\'/%3E%3Ccircle cx=\'10\' cy=\'10\' r=\'4\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3Ccircle cx=\'30\' cy=\'10\' r=\'4\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3Ccircle cx=\'10\' cy=\'30\' r=\'4\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3Ccircle cx=\'30\' cy=\'30\' r=\'4\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3Cpolygon points=\'20,16 24,20 20,24 16,20\' fill=\'none\' stroke=\'white\' stroke-width=\'0.4\' stroke-opacity=\'0.05\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23t)\'/%3E%3C/svg%3E")',
-                }}
-              />
-              <div className="relative p-6 flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">
-                    {completedCount === 0 ? 'Start here' : 'Continue learning'}
-                  </div>
-                  <h2 className="font-serif text-2xl text-white mb-1">{nextLesson.title}</h2>
-                  <p className="text-sm text-white/75 max-w-sm leading-relaxed">{nextLesson.theme}</p>
-                  <div className="mt-3 text-xs text-white/60">{nextLesson.number} · 5 new words · 10 exercises</div>
-                </div>
-                <div className="shrink-0 text-5xl">{nextLesson.emoji}</div>
-              </div>
-              <div className="relative px-6 pb-5">
-                <div className="bg-white/15 backdrop-blur-sm border border-white/30 text-white font-semibold text-sm rounded-xl px-5 py-2.5 inline-block hover:bg-white/25 transition-colors">
-                  {completedCount === 0 ? 'Begin Lesson →' : 'Continue →'}
-                </div>
-              </div>
-            </Link>
-          );
-        })()}
+        {/* ── Hero card — dark azulejo ── */}
+        <Link
+          href={`/learn/${nextLesson.id}`}
+          className="card-dark block no-underline rounded-3xl overflow-hidden mb-6 shadow-hero group"
+          style={{ borderRadius: '24px' }}
+        >
+          <div className="relative p-7 flex items-center justify-between gap-4">
+            <div>
+              <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-full mb-3"
+                style={{ background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', color: 'rgba(255,255,255,.55)' }}>
+                {completedCount === 0 ? 'Start here' : 'Continue learning'}
+              </span>
+              <h2 className="font-serif text-2xl text-white mb-1 font-normal">{nextLesson.title}</h2>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,.6)' }}>{nextLesson.theme}</p>
+              <button className="btn-primary text-sm px-6 py-2.5">
+                {completedCount === 0 ? 'Begin Lesson →' : 'Continue →'}
+              </button>
+            </div>
+            <div className="shrink-0 text-6xl opacity-90">{nextLesson.emoji}</div>
+          </div>
+        </Link>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
+        {/* ── Stats row ── */}
+        <div className="grid grid-cols-4 gap-3 mb-6">
           {[
-            { label: 'XP', value: state.xp, sub: 'total points', accent: '#1A3B9E' },
-            { label: 'Words', value: totalWords, sub: 'words learned', accent: '#BF4F2A' },
-            { label: 'Lessons', value: completedCount, sub: `of ${ALL_LESSONS.length} done`, accent: '#C49A2E' },
-            { label: 'Streak', value: state.streak, sub: 'day streak 🔥', accent: '#e53e2f' },
+            { label: 'XP', value: state.xp, sub: 'points', accent: '#1A3B9E' },
+            { label: 'Words', value: totalWords, sub: 'learned', accent: '#BF4F2A' },
+            { label: 'Lessons', value: completedCount, sub: `of ${ALL_LESSONS.length}`, accent: '#C49A2E' },
+            { label: 'Streak', value: state.streak, sub: 'days 🔥', accent: '#e53e2f' },
           ].map(({ label, value, sub, accent }) => (
             <div key={label} className="card p-4 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style={{ background: accent }} />
+              <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: accent }} />
               <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-1">{label}</div>
-              <div className="font-serif text-2xl font-extrabold text-txt">{value}</div>
+              <div className="font-serif text-2xl text-txt">{value}</div>
               <div className="text-xs text-txt3 mt-0.5">{sub}</div>
             </div>
           ))}
         </div>
 
-        {/* SRS review nudge */}
+        {/* ── SRS review nudge ── */}
         {dueCount > 0 && (
-          <Link href="/review" className="block no-underline card p-4 mb-6 border border-terra/30 hover:shadow-hero transition-shadow group flex items-center gap-4">
-            <div className="text-2xl group-hover:animate-float">🔁</div>
-            <div className="flex-1">
-              <span className="font-semibold text-txt">{dueCount} word{dueCount !== 1 ? 's' : ''} due for review</span>
-              <span className="text-txt3 text-sm ml-2">· Keep your streak strong</span>
+          <Link href="/review" className="block no-underline mb-6">
+            <div className="card p-4 flex items-center gap-4 hover:shadow-hero transition-shadow group"
+              style={{ borderColor: 'rgba(191,79,42,.25)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
+                style={{ background: 'rgba(191,79,42,.1)', color: '#BF4F2A' }}>↺</div>
+              <div className="flex-1">
+                <span className="font-semibold text-txt text-sm">{dueCount} word{dueCount !== 1 ? 's' : ''} due for review</span>
+                <p className="text-txt3 text-xs mt-0.5">Keep your streak strong</p>
+              </div>
+              <span className="chip-gold shrink-0">Review →</span>
             </div>
-            <div className="chip-gold shrink-0">Review →</div>
           </Link>
         )}
 
-        {/* Lesson path */}
-        <div className="mb-8">
-          <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-4">Your Learning Path</div>
+        {/* ── Lesson path ── */}
+        <div className="mb-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-txt3 mb-4">Your Learning Path</p>
           <div className="overflow-x-auto pb-2">
             <div className="flex items-center gap-0 min-w-max px-2">
               {ALL_LESSONS.map((lesson, i) => (
@@ -133,7 +122,7 @@ export default function HomePage() {
                     stars={state.lessonProgress[lesson.id]?.stars ?? 0}
                   />
                   {i < ALL_LESSONS.length - 1 && (
-                    <div className={`w-10 h-1 rounded-full mx-1 ${state.lessonProgress[lesson.id]?.completed ? 'bg-gradient-to-r from-sage to-blu2' : 'bg-brd'}`} />
+                    <div className={`w-8 h-1 rounded-full mx-1 ${state.lessonProgress[lesson.id]?.completed ? 'bg-sage' : 'bg-brd'}`} />
                   )}
                 </div>
               ))}
@@ -141,22 +130,24 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Culture Trivia CTA */}
-        <Link href="/trivia" className="block no-underline card p-5 mb-8 hover:shadow-hero transition-shadow group">
-          <div className="flex items-center gap-4">
-            <div className="text-3xl group-hover:animate-float">🏰</div>
+        {/* ── Culture Trivia — active card style ── */}
+        <Link href="/trivia" className="block no-underline mb-6">
+          <div className="card-active rounded-3xl p-6 flex items-center gap-5 shadow-card hover:shadow-hero transition-shadow group"
+            style={{ border: '1px solid rgba(26,59,158,.15)', borderRadius: '24px' }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 -rotate-3 group-hover:rotate-0 transition-transform"
+              style={{ background: 'rgba(26,59,158,.1)', color: '#1A3B9E' }}>🏰</div>
             <div className="flex-1">
-              <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-1">Culture Trivia</div>
-              <h3 className="font-serif text-lg text-txt">Test your Portugal knowledge</h3>
+              <p className="text-xs font-bold uppercase tracking-widest text-txt3 mb-1">Culture Trivia</p>
+              <h3 className="font-serif text-lg text-txt font-normal">Test your Portugal knowledge</h3>
               <p className="text-sm text-txt3 mt-0.5">Fado · Geography · History · Food · Football</p>
             </div>
-            <div className="chip-gold shrink-0">5 topics</div>
+            <span className="chip-gold shrink-0">5 topics</span>
           </div>
         </Link>
 
-        {/* Achievements */}
+        {/* ── Achievements ── */}
         <div>
-          <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-4">Achievements</div>
+          <p className="text-xs font-bold uppercase tracking-widest text-txt3 mb-4">Achievements</p>
           <div className="flex flex-wrap gap-2">
             {ACHIEVEMENTS.map(ach => {
               const earned = state.earnedAchievements.includes(ach.id);
@@ -164,9 +155,7 @@ export default function HomePage() {
                 <div
                   key={ach.id}
                   className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                    earned
-                      ? 'bg-gold2 border-gold text-gold shadow-sm'
-                      : 'bg-ivory border-brd text-txt3 opacity-50 grayscale'
+                    earned ? 'bg-gold2 border-gold text-gold shadow-sm' : 'bg-ivory border-brd text-txt3 opacity-40 grayscale'
                   }`}
                   title={ach.desc}
                 >
