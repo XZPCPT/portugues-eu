@@ -18,7 +18,8 @@ module.exports = {
         gold2:  '#FBF3DC',
         terra:  '#BF4F2A',
         terra2: '#FBE9E3',
-        coral:  '#e53e2f',
+        coral:  '#BF4F2A',   /* alias → terra, for wrong/error states */
+        muted:  '#7E7468',
         sage:   '#3A7D5C',
         sage2:  '#E6F4ED',
         txt:    '#0F1C3F',
@@ -29,6 +30,7 @@ module.exports = {
       fontFamily: {
         serif: ['"Fraunces"', 'Georgia', 'serif'],
         sans:  ['"DM Sans"', 'system-ui', 'sans-serif'],
+        mono:  ['"JetBrains Mono"', 'monospace'],
       },
       borderRadius: {
         DEFAULT: '16px',

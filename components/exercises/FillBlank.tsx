@@ -5,48 +5,68 @@ import { cn } from '@/lib/utils';
 
 interface FillBlankProps {
   instruction: string;
-  sentence: string;
+  sentence: string;   // contains ___ for the blank
   correct: string;
   options: string[];
   translation?: string;
   onResult: (correct: boolean) => void;
 }
 
-export default function FillBlank({ instruction, sentence, correct, options, translation, onResult }: FillBlankProps) {
+export default function FillBlank({
+  instruction, sentence, correct, options, translation, onResult,
+}: FillBlankProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const parts = sentence.split('___');
+  const isMatch = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
   const handleSelect = (opt: string) => {
     if (submitted) return;
     setSelected(opt);
     setSubmitted(true);
-    const isCorrect = opt.toLowerCase() === correct.toLowerCase();
-    setTimeout(() => onResult(isCorrect), 900);
+    setTimeout(() => onResult(isMatch(opt, correct)), 820);
   };
 
+  const parts = sentence.split('___');
+  const filled = selected || '';
+  const resultOk = submitted && isMatch(filled, correct);
+
   return (
-    <div className="animate-slide-up">
-      <div className="flex items-start gap-3 mb-6">
-        <div className="text-xl">✏️</div>
-        <div>
-          <div className="text-xs font-bold text-txt3 uppercase tracking-widest mb-1">Fill in the blank</div>
-          <p className="font-medium text-txt2 mb-1">{instruction}</p>
-          {translation && <p className="text-xs text-txt3 italic">{translation}</p>}
-        </div>
+    <div className="animate-slide-up flex flex-col gap-5">
+
+      {/* Prompt */}
+      <div className="flex flex-col gap-1">
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--muted)' }}>
+          Fill in the blank
+        </p>
+        <p className="text-sm font-medium" style={{ color: 'var(--navy)' }}>{instruction}</p>
+        {translation && (
+          <p className="text-xs italic" style={{ color: 'var(--muted)' }}>{translation}</p>
+        )}
       </div>
 
-      {/* Sentence with blank */}
-      <div className="bg-ivory border border-brd rounded-xl px-5 py-4 mb-6 text-center">
-        <p className="font-serif text-2xl text-txt leading-relaxed">
+      {/* Sentence display */}
+      <div className="px-5 py-4 rounded-2xl text-center"
+        style={{ background: 'var(--cream-2)', border: '1px solid var(--border)' }}>
+        <p className="font-serif text-2xl leading-relaxed" style={{ color: 'var(--navy)' }}>
           {parts[0]}
-          <span className={cn(
-            'inline-block min-w-[80px] border-b-2 mx-1 px-2 text-center transition-all duration-200',
-            !submitted && 'border-blu text-blu/40',
-            submitted && selected?.toLowerCase() === correct.toLowerCase() && 'border-sage text-sage',
-            submitted && selected?.toLowerCase() !== correct.toLowerCase() && 'border-coral text-coral',
-          )}>
+          <span
+            className="inline-block min-w-[72px] mx-1 px-2 text-center border-b-2 transition-all duration-200"
+            style={{
+              borderColor: !submitted
+                ? 'var(--cobalt)'
+                : resultOk
+                  ? '#2E7D5A'
+                  : 'var(--terra)',
+              color: !submitted
+                ? 'var(--cobalt)'
+                : resultOk
+                  ? '#2E7D5A'
+                  : 'var(--terra)',
+              opacity: submitted ? 1 : selected ? 1 : 0.4,
+              fontStyle: 'italic',
+            }}
+          >
             {selected || '___'}
           </span>
           {parts[1]}
@@ -54,21 +74,21 @@ export default function FillBlank({ instruction, sentence, correct, options, tra
       </div>
 
       {/* Options */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         {options.map(opt => {
-          const isSelected = selected === opt;
-          const isCorrectOpt = opt.toLowerCase() === correct.toLowerCase();
+          const isSelected   = selected === opt;
+          const isCorrectOpt = isMatch(opt, correct);
           return (
             <button
               key={opt}
               onClick={() => handleSelect(opt)}
+              disabled={submitted}
               className={cn(
-                'rounded-xl border-2 px-4 py-3 font-serif text-lg text-center transition-all duration-200',
-                !submitted && 'border-brd bg-ivory hover:border-blu2 hover:bg-blu4/30 hover:scale-[1.01]',
-                submitted && isSelected && isCorrectOpt && 'border-sage bg-sage2 text-sage',
-                submitted && isSelected && !isCorrectOpt && 'border-coral bg-coral/10 text-coral',
-                submitted && !isSelected && isCorrectOpt && 'border-sage bg-sage2 text-sage',
-                submitted && !isSelected && !isCorrectOpt && 'border-brd bg-ivory opacity-50',
+                'option-chip text-center font-serif text-lg',
+                submitted && isSelected && isCorrectOpt  && 'correct',
+                submitted && isSelected && !isCorrectOpt && 'wrong animate-shake',
+                submitted && !isSelected && isCorrectOpt  && 'correct',
+                submitted && !isSelected && !isCorrectOpt && 'dimmed',
               )}
             >
               {opt}

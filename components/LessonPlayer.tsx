@@ -2,237 +2,363 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { cn, XP_PER_EXERCISE, XP_BONUS_FLAWLESS, MAX_HEARTS, starsFromMistakes, speak } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { Lesson } from '@/data/lessons';
-import Hearts from '@/components/ui/Hearts';
-import XPBar from '@/components/ui/XPBar';
 import MultipleChoice from '@/components/exercises/MultipleChoice';
-import FillBlank from '@/components/exercises/FillBlank';
-import TapPairs from '@/components/exercises/TapPairs';
-import ArrangeWords from '@/components/exercises/ArrangeWords';
-import TypeAnswer from '@/components/exercises/TypeAnswer';
+import FillBlank      from '@/components/exercises/FillBlank';
+import TapPairs       from '@/components/exercises/TapPairs';
+import ArrangeWords   from '@/components/exercises/ArrangeWords';
+
+// ── Constants ──────────────────────────────────────────────────────────────
+const XP_PER_EXERCISE  = 10;
+const XP_BONUS_FLAWLESS = 30;
+const MAX_HEARTS = 5;
+
+function starsFromMistakes(n: number) {
+  if (n === 0) return 3;
+  if (n <= 2)  return 2;
+  if (n <= 4)  return 1;
+  return 0;
+}
+
+// ── Types ──────────────────────────────────────────────────────────────────
+type Phase = 'vocab' | 'exercises' | 'complete';
 
 interface LessonPlayerProps {
   lesson: Lesson;
   onComplete?: (stars: number, xpGained: number) => void;
 }
 
-type Phase = 'vocab' | 'exercises' | 'complete';
+// ── Sub-components ─────────────────────────────────────────────────────────
 
+/** Thin top bar shared across phases */
+function PlayerBar({
+  progress, total, hearts, onClose,
+}: { progress: number; total: number; hearts: number; onClose: () => void }) {
+  return (
+    <div
+      className="flex items-center gap-3 px-5 py-4"
+      style={{
+        background: 'rgba(250,247,242,.90)',
+        backdropFilter: 'saturate(160%) blur(12px)',
+        borderBottom: '1px solid var(--border)',
+      }}
+    >
+      <button
+        onClick={onClose}
+        className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+        style={{ background: 'var(--ivory)', border: '1px solid var(--border)' }}
+        aria-label="Close lesson"
+      >
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--muted)' }}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      {/* Progress bar */}
+      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width: `${(progress / total) * 100}%`,
+            background: 'var(--cobalt)',
+          }}
+        />
+      </div>
+
+      {/* Hearts */}
+      <div className="flex gap-1 flex-shrink-0">
+        {Array.from({ length: MAX_HEARTS }).map((_, i) => (
+          <span
+            key={i}
+            className="text-sm transition-all duration-300"
+            style={{ opacity: i < hearts ? 1 : 0.18 }}
+          >
+            ♥
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────────
 export default function LessonPlayer({ lesson, onComplete }: LessonPlayerProps) {
   const router = useRouter();
-  const [phase, setPhase] = useState<Phase>('vocab');
+
+  const [phase, setPhase]     = useState<Phase>('vocab');
   const [vocabIdx, setVocabIdx] = useState(0);
-  const [exIdx, setExIdx] = useState(0);
-  const [hearts, setHearts] = useState(MAX_HEARTS);
+  const [exIdx, setExIdx]     = useState(0);
+  const [hearts, setHearts]   = useState(MAX_HEARTS);
   const [mistakes, setMistakes] = useState(0);
   const [xpGained, setXpGained] = useState(0);
-  const [key, setKey] = useState(0); // force remount exercise
+  const [exerciseKey, setExerciseKey] = useState(0);
 
   const totalExercises = lesson.exercises.length;
   const currentExercise = lesson.exercises[exIdx];
   const currentWord = lesson.words[vocabIdx];
 
-  /* ── Vocab phase handlers ── */
+  // ── Vocab phase ────────────────────────────────────────────────────────
   const nextVocab = () => {
-    if (vocabIdx < lesson.words.length - 1) {
-      setVocabIdx(v => v + 1);
-    } else {
-      setPhase('exercises');
-    }
+    if (vocabIdx < lesson.words.length - 1) setVocabIdx(v => v + 1);
+    else setPhase('exercises');
   };
+  const prevVocab = () => { if (vocabIdx > 0) setVocabIdx(v => v - 1); };
 
-  const prevVocab = () => {
-    if (vocabIdx > 0) setVocabIdx(v => v - 1);
-  };
-
-  /* ── Exercise result handler ── */
+  // ── Exercise result ───────────────────────────────────────────────────
   const handleResult = useCallback((correct: boolean) => {
+    let newMistakes = mistakes;
+    let newXp = xpGained;
+
     if (correct) {
-      setXpGained(x => x + XP_PER_EXERCISE);
+      newXp = xpGained + XP_PER_EXERCISE;
+      setXpGained(newXp);
     } else {
-      setMistakes(m => m + 1);
+      newMistakes = mistakes + 1;
+      setMistakes(newMistakes);
       setHearts(h => Math.max(0, h - 1));
     }
 
     const nextIdx = exIdx + 1;
     if (nextIdx >= totalExercises) {
-      // Lesson complete
-      const stars = starsFromMistakes(mistakes + (correct ? 0 : 1));
-      const bonusXp = (mistakes === 0 && correct) ? XP_BONUS_FLAWLESS : 0;
-      const totalXp = xpGained + (correct ? XP_PER_EXERCISE : 0) + bonusXp;
-      setXpGained(totalXp);
+      const stars = starsFromMistakes(newMistakes);
+      const bonus = newMistakes === 0 ? XP_BONUS_FLAWLESS : 0;
+      setXpGained(newXp + bonus);
       setPhase('complete');
-      onComplete?.(stars, totalXp);
+      onComplete?.(stars, newXp + bonus);
     } else {
       setExIdx(nextIdx);
-      setKey(k => k + 1);
+      setExerciseKey(k => k + 1);
     }
   }, [exIdx, totalExercises, mistakes, xpGained, onComplete]);
 
-  /* ── Vocabulary phase ── */
+  // ── VOCAB PHASE ────────────────────────────────────────────────────────
   if (phase === 'vocab') {
     return (
-      <div className="max-w-lg mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => router.back()} className="btn-secondary px-3 py-2 text-sm">← Back</button>
+      <div className="min-h-screen flex flex-col" style={{ background: 'var(--cream)' }}>
+        {/* Top bar */}
+        <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: '1px solid var(--border)', background: 'rgba(250,247,242,.90)', backdropFilter: 'saturate(160%) blur(12px)' }}>
+          <button onClick={() => router.back()} className="btn-secondary py-2 px-3 text-sm">← Back</button>
           <div className="flex-1">
-            <div className="text-xs font-bold uppercase tracking-widest text-txt3 mb-1">{lesson.number}</div>
-            <h1 className="font-serif text-xl text-txt">{lesson.title}</h1>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--muted)' }}>{lesson.number}</p>
+            <p className="font-serif text-base font-medium" style={{ color: 'var(--navy)' }}>{lesson.title}</p>
           </div>
-          <div className="chip-gold">{lesson.emoji}</div>
+          {/* Word dots */}
+          <div className="flex gap-1.5">
+            {lesson.words.map((_, i) => (
+              <div
+                key={i}
+                className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                style={{ background: i <= vocabIdx ? 'var(--cobalt)' : 'var(--border)' }}
+              />
+            ))}
+          </div>
         </div>
-
-        <XPBar current={vocabIdx} total={lesson.words.length} label="Words" />
 
         {/* Flashcard */}
-        <div className="mt-6 rounded-3xl border border-blu/10 bg-gradient-to-br from-ivory to-[#f0f8ff] shadow-hero p-8 text-center min-h-[320px] flex flex-col items-center justify-center gap-3 relative overflow-hidden animate-slide-up">
-          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-blu/5 pointer-events-none" />
-          <div className="text-6xl animate-float">{currentWord ? lesson.emoji : '🎉'}</div>
-          <button
-            onClick={() => speak(currentWord.pt)}
-            className="font-serif text-5xl text-blu hover:opacity-75 transition-opacity active:scale-95"
+        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6">
+          <div
+            className="w-full max-w-sm rounded-3xl p-8 text-center flex flex-col items-center gap-4"
+            style={{
+              background: 'var(--ivory)',
+              border: '1px solid var(--border)',
+              boxShadow: '0 1px 0 rgba(15,28,63,.02), 0 16px 48px rgba(15,28,63,.08)',
+            }}
           >
-            {currentWord.pt}
-          </button>
-          <p className="text-lg text-txt2">{currentWord.en}</p>
-          <div className="flex items-center gap-2 bg-blu4 rounded-full px-4 py-1.5 text-sm text-blu italic">
-            🔈 {currentWord.phonetic}
+            <span className="text-5xl">{lesson.emoji}</span>
+
+            <div>
+              <p
+                className="font-serif italic text-5xl font-light leading-none mb-2"
+                style={{ color: 'var(--cobalt)', letterSpacing: '-0.02em' }}
+              >
+                {currentWord.pt}
+              </p>
+              <p className="text-lg font-medium" style={{ color: 'var(--navy)' }}>{currentWord.en}</p>
+            </div>
+
+            {/* Phonetic */}
+            <div
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-mono"
+              style={{ background: 'var(--cream-2)', color: 'var(--muted)', fontSize: 12 }}
+            >
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--cobalt)', flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"/>
+              </svg>
+              {currentWord.phonetic}
+            </div>
+
+            {/* Example */}
+            <div
+              className="w-full rounded-xl px-4 py-3 text-sm text-left font-serif italic"
+              style={{ background: 'var(--cream-2)', color: 'var(--navy)', borderLeft: '3px solid var(--cobalt)', borderRadius: '0 12px 12px 0' }}
+            >
+              {currentWord.example}
+            </div>
           </div>
-          <div className="bg-sage2 rounded-xl px-4 py-2.5 text-sm text-sage font-medium w-full">
-            {currentWord.example}
+
+          {/* Navigation */}
+          <div className="flex items-center gap-3 w-full max-w-sm">
+            <button
+              onClick={prevVocab}
+              disabled={vocabIdx === 0}
+              className="btn-secondary flex-shrink-0 disabled:opacity-30"
+            >
+              ←
+            </button>
+            <button onClick={nextVocab} className="btn-primary flex-1 justify-center py-3.5">
+              {vocabIdx < lesson.words.length - 1 ? 'Next word' : 'Start exercises →'}
+            </button>
           </div>
+
+          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+            {vocabIdx + 1} of {lesson.words.length} words
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── EXERCISES PHASE ────────────────────────────────────────────────────
+  if (phase === 'exercises') {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ background: 'var(--cream)' }}>
+        <PlayerBar
+          progress={exIdx}
+          total={totalExercises}
+          hearts={hearts}
+          onClose={() => router.back()}
+        />
+
+        <div className="flex-1 flex flex-col items-center justify-center p-5">
+          <div className="w-full max-w-md card p-6 min-h-[360px] flex flex-col" key={exerciseKey}>
+
+            {currentExercise.type === 'multipleChoice' || currentExercise.type === 'reverseChoice' ? (
+              <MultipleChoice
+                prompt={currentExercise.prompt!}
+                audio={currentExercise.audio}
+                options={currentExercise.options!}
+                correct={currentExercise.correct!}
+                onResult={handleResult}
+              />
+            ) : currentExercise.type === 'fillBlank' ? (
+              <FillBlank
+                instruction={currentExercise.instruction!}
+                sentence={currentExercise.sentence!}
+                correct={currentExercise.correct!}
+                options={currentExercise.options!}
+                translation={currentExercise.translation}
+                onResult={handleResult}
+              />
+            ) : currentExercise.type === 'tapPairs' ? (
+              <TapPairs
+                instruction={currentExercise.instruction!}
+                pairs={currentExercise.pairs!}
+                onResult={handleResult}
+              />
+            ) : currentExercise.type === 'arrangeWords' ? (
+              <ArrangeWords
+                instruction={currentExercise.instruction!}
+                words={currentExercise.words!}
+                correct={currentExercise.correct!}
+                onResult={handleResult}
+              />
+            ) : null}
+
+          </div>
+
+          <p className="mt-4 text-xs" style={{ color: 'var(--muted)' }}>
+            {exIdx + 1} / {totalExercises} · {xpGained} XP
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── COMPLETE SCREEN ────────────────────────────────────────────────────
+  const stars = starsFromMistakes(mistakes);
+  const flawless = mistakes === 0;
+
+  return (
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-6 animate-pop-in"
+      style={{ background: 'var(--cream)' }}
+    >
+      <div
+        className="w-full max-w-sm rounded-3xl p-8 flex flex-col items-center gap-6 text-center"
+        style={{ background: 'var(--ivory)', border: '1px solid var(--border)', boxShadow: '0 1px 0 rgba(15,28,63,.02), 0 20px 60px rgba(15,28,63,.10)' }}
+      >
+        {/* Lesson emoji */}
+        <span className="text-5xl">{lesson.emoji}</span>
+
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--muted)' }}>
+            Lesson complete
+          </p>
+          <h2 className="font-serif text-2xl font-medium" style={{ color: 'var(--navy)', letterSpacing: '-0.015em' }}>
+            {lesson.title}
+          </h2>
         </div>
 
-        {/* Dot indicators */}
-        <div className="flex justify-center gap-1.5 mt-5">
-          {lesson.words.map((_, i) => (
-            <div key={i} className={cn('w-2 h-2 rounded-full transition-colors', i === vocabIdx ? 'bg-blu' : i < vocabIdx ? 'bg-blu3' : 'bg-brd')} />
+        {/* Stars */}
+        <div className="flex gap-2">
+          {[1, 2, 3].map(s => (
+            <svg
+              key={s}
+              width="28" height="28"
+              viewBox="0 0 24 24"
+              fill={s <= stars ? 'var(--gold)' : 'none'}
+              stroke={s <= stars ? 'var(--gold)' : 'var(--border-2)'}
+              strokeWidth="1.5"
+              className="transition-all duration-300"
+              style={{ transitionDelay: `${s * 80}ms` }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>
+            </svg>
           ))}
         </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between mt-6 gap-3">
-          <button onClick={prevVocab} disabled={vocabIdx === 0} className="btn-secondary disabled:opacity-30">← Prev</button>
-          <button onClick={() => speak(currentWord.pt)} className="flex items-center gap-2 bg-blu/10 text-blu rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-blu/20 transition-colors">
-            🔊 Listen
-          </button>
-          <button onClick={nextVocab} className="btn-primary">
-            {vocabIdx < lesson.words.length - 1 ? 'Next →' : 'Start Exercises →'}
-          </button>
+        {/* Stats row */}
+        <div
+          className="w-full grid grid-cols-3 gap-2 rounded-2xl p-4"
+          style={{ background: 'var(--cream-2)', border: '1px solid var(--border)' }}
+        >
+          {[
+            { k: 'XP earned', v: `+${xpGained}`, color: 'var(--gold-deep)' },
+            { k: 'Hearts left', v: `${hearts}/${MAX_HEARTS}`, color: 'var(--terra)' },
+            { k: 'Mistakes', v: mistakes === 0 ? '0' : `${mistakes}`, color: mistakes === 0 ? '#2E7D5A' : 'var(--terra)' },
+          ].map(stat => (
+            <div key={stat.k} className="flex flex-col items-center gap-1">
+              <span className="font-serif text-2xl font-medium" style={{ color: stat.color, letterSpacing: '-0.01em' }}>
+                {stat.v}
+              </span>
+              <span className="text-xs uppercase tracking-wide font-bold" style={{ color: 'var(--muted)', fontSize: 9 }}>
+                {stat.k}
+              </span>
+            </div>
+          ))}
         </div>
-      </div>
-    );
-  }
 
-  /* ── Exercises phase ── */
-  if (phase === 'exercises') {
-    return (
-      <div className="max-w-lg mx-auto px-4 py-8">
-        {/* Progress bar */}
-        <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => router.back()} className="text-txt3 hover:text-txt text-sm">✕</button>
-          <div className="flex-1 bg-brd rounded-full h-2 overflow-hidden">
-            <div
-              className="h-full rounded-full progress-shimmer transition-all duration-500"
-              style={{ width: `${((exIdx) / totalExercises) * 100}%` }}
-            />
+        {/* Flawless bonus */}
+        {flawless && (
+          <div
+            className="w-full rounded-xl px-4 py-3 text-sm font-semibold flex items-center justify-center gap-2"
+            style={{ background: 'rgba(196,154,46,.10)', border: '1px solid rgba(196,154,46,.28)', color: 'var(--gold-deep)' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--gold)" stroke="none"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            Flawless! +{XP_BONUS_FLAWLESS} bonus XP
           </div>
-          <Hearts current={hearts} />
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-3 w-full">
+          <button onClick={() => router.push('/learn')} className="btn-secondary flex-1 justify-center">
+            All lessons
+          </button>
+          <button onClick={() => router.push('/learn')} className="btn-primary flex-1 justify-center">
+            Continue →
+          </button>
         </div>
-
-        {/* Exercise card */}
-        <div className="card p-6 min-h-[380px]" key={key}>
-          {currentExercise.type === 'multipleChoice' || currentExercise.type === 'reverseChoice' ? (
-            <MultipleChoice
-              prompt={currentExercise.prompt!}
-              audio={currentExercise.audio}
-              options={currentExercise.options!}
-              correct={currentExercise.correct!}
-              onResult={handleResult}
-            />
-          ) : currentExercise.type === 'fillBlank' ? (
-            <FillBlank
-              instruction={currentExercise.instruction!}
-              sentence={currentExercise.sentence!}
-              correct={currentExercise.correct!}
-              options={currentExercise.options!}
-              translation={currentExercise.translation}
-              onResult={handleResult}
-            />
-          ) : currentExercise.type === 'tapPairs' ? (
-            <TapPairs
-              instruction={currentExercise.instruction!}
-              pairs={currentExercise.pairs!}
-              onResult={handleResult}
-            />
-          ) : currentExercise.type === 'arrangeWords' ? (
-            <ArrangeWords
-              instruction={currentExercise.instruction!}
-              words={currentExercise.words!}
-              correct={currentExercise.correct!}
-              onResult={handleResult}
-            />
-          ) : currentExercise.type === 'typeAnswer' ? (
-            <TypeAnswer
-              prompt={currentExercise.prompt!}
-              hint={currentExercise.hint}
-              correct={currentExercise.correct!}
-              alternates={currentExercise.alternates}
-              onResult={handleResult}
-            />
-          ) : null}
-        </div>
-
-        {/* XP indicator */}
-        <p className="text-center text-xs text-txt3 mt-3">
-          {exIdx + 1} / {totalExercises} · {xpGained} XP earned
-        </p>
-      </div>
-    );
-  }
-
-  /* ── Complete screen ── */
-  const stars = starsFromMistakes(mistakes);
-  const starStr = ['☆☆☆', '⭐☆☆', '⭐⭐☆', '⭐⭐⭐'][stars] ?? '⭐⭐⭐';
-
-  return (
-    <div className="max-w-lg mx-auto px-4 py-16 text-center animate-pop-in">
-      <div className="text-7xl mb-4">{lesson.emoji}</div>
-      <h2 className="font-serif text-3xl text-txt mb-2">Lesson Complete!</h2>
-      <p className="text-txt3 mb-6">{lesson.title}</p>
-
-      <div className="text-4xl mb-2">{starStr}</div>
-
-      <div className="flex justify-center gap-8 my-8">
-        <div className="text-center">
-          <div className="font-serif text-3xl text-gold">+{xpGained}</div>
-          <div className="text-xs text-txt3 uppercase tracking-wide">XP Earned</div>
-        </div>
-        <div className="text-center">
-          <div className="font-serif text-3xl text-txt">{hearts}</div>
-          <div className="text-xs text-txt3 uppercase tracking-wide">Hearts Left</div>
-        </div>
-        <div className="text-center">
-          <div className="font-serif text-3xl text-sage">{mistakes === 0 ? '✨' : mistakes}</div>
-          <div className="text-xs text-txt3 uppercase tracking-wide">{mistakes === 0 ? 'Flawless!' : 'Mistakes'}</div>
-        </div>
-      </div>
-
-      {mistakes === 0 && (
-        <div className="bg-gold2 border border-gold rounded-xl p-3 mb-6 text-sm text-gold font-semibold">
-          ✨ Flawless lesson! +{XP_BONUS_FLAWLESS} bonus XP
-        </div>
-      )}
-
-      <div className="flex gap-3 justify-center">
-        <button onClick={() => router.push('/learn')} className="btn-secondary">
-          All Lessons
-        </button>
-        <button onClick={() => router.push('/learn')} className="btn-primary">
-          Continue →
-        </button>
       </div>
     </div>
   );

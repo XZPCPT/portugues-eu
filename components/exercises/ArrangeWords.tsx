@@ -11,7 +11,7 @@ interface ArrangeWordsProps {
 }
 
 export default function ArrangeWords({ instruction, words, correct, onResult }: ArrangeWordsProps) {
-  const [bank, setBank] = useState(() => [...words].sort(() => Math.random() - 0.5));
+  const [bank, setBank]         = useState(() => [...words].sort(() => Math.random() - 0.5));
   const [arranged, setArranged] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -22,90 +22,109 @@ export default function ArrangeWords({ instruction, words, correct, onResult }: 
     setBank(prev => prev.filter((_, i) => i !== idx));
   };
 
-  const removeWord = (word: string, idx: number) => {
+  const removeWord = (idx: number) => {
     if (submitted) return;
+    const word = arranged[idx];
     setBank(prev => [...prev, word]);
     setArranged(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleCheck = () => {
-    if (arranged.length !== words.length) return;
-    const attempt = arranged.join(' ');
-    const ok = attempt.trim() === correct.trim();
+    const ok = arranged.join(' ').trim() === correct.trim();
     setIsCorrect(ok);
     setSubmitted(true);
-    setTimeout(() => onResult(ok), 900);
+    setTimeout(() => onResult(ok), 880);
   };
 
   return (
-    <div className="animate-slide-up">
-      <div className="flex items-start gap-3 mb-6">
-        <div className="text-xl">🧩</div>
-        <div>
-          <div className="text-xs font-bold text-txt3 uppercase tracking-widest mb-1">Arrange the words</div>
-          <p className="font-medium text-txt2">{instruction}</p>
-        </div>
+    <div className="animate-slide-up flex flex-col gap-5">
+
+      {/* Prompt */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--muted)' }}>
+          Arrange the words
+        </p>
+        <p className="text-sm font-medium" style={{ color: 'var(--navy)' }}>{instruction}</p>
       </div>
 
-      {/* Answer area */}
-      <div className={cn(
-        'min-h-[56px] rounded-xl border-2 p-3 mb-5 flex flex-wrap gap-2 items-center transition-all',
-        !submitted && 'border-blu/30 bg-blu4/20',
-        submitted && isCorrect && 'border-sage bg-sage2',
-        submitted && !isCorrect && 'border-coral bg-coral/10',
-      )}>
-        {arranged.length === 0 && (
-          <span className="text-txt3 text-sm italic">Tap words below to build your sentence…</span>
+      {/* Answer slot */}
+      <div
+        className={cn(
+          'min-h-[52px] rounded-2xl p-3 flex flex-wrap gap-2 items-center transition-all duration-300',
+          !submitted && 'border-2 border-dashed',
         )}
-        {arranged.map((word, i) => (
-          <button
-            key={`${word}-${i}`}
-            onClick={() => removeWord(word, i)}
-            className={cn(
-              'rounded-lg border px-3 py-1.5 font-serif text-base transition-all duration-150',
-              !submitted && 'border-blu bg-white text-blu hover:bg-blu4 active:scale-95',
-              submitted && isCorrect && 'border-sage text-sage bg-white',
-              submitted && !isCorrect && 'border-coral text-coral bg-white',
-            )}
-          >
-            {word}
-          </button>
-        ))}
+        style={{
+          borderColor: submitted
+            ? 'transparent'
+            : 'var(--border-2)',
+          background: submitted && isCorrect
+            ? 'rgba(58,125,92,.08)'
+            : submitted && !isCorrect
+              ? 'rgba(191,79,42,.06)'
+              : 'rgba(255,255,255,.5)',
+          border: submitted
+            ? `1px solid ${isCorrect ? 'rgba(58,125,92,.30)' : 'rgba(191,79,42,.28)'}`
+            : undefined,
+          borderRadius: 16,
+        }}
+      >
+        {arranged.length === 0 ? (
+          <span className="text-sm italic" style={{ color: 'var(--muted)' }}>
+            Tap words below to build your answer…
+          </span>
+        ) : (
+          arranged.map((word, i) => (
+            <button
+              key={`${word}-${i}`}
+              onClick={() => removeWord(i)}
+              className={cn(
+                'word-chip',
+                submitted && isCorrect  && 'correct',
+                submitted && !isCorrect && 'wrong',
+                !submitted && 'in-slot',
+              )}
+            >
+              {word}
+            </button>
+          ))
+        )}
       </div>
 
       {/* Word bank */}
-      <div className="flex flex-wrap gap-2 mb-6 justify-center">
+      <div className="flex flex-wrap gap-2 justify-center">
         {bank.map((word, i) => (
           <button
             key={`${word}-${i}`}
             onClick={() => addWord(word, i)}
-            className="rounded-lg border-2 border-brd bg-ivory px-3 py-1.5 font-serif text-base text-txt2 hover:border-blu2 hover:bg-blu4/20 active:scale-95 transition-all duration-150"
+            className="word-chip"
           >
             {word}
           </button>
         ))}
       </div>
 
-      {/* Check button */}
-      {!submitted && (
+      {/* Check / feedback */}
+      {!submitted ? (
         <button
           onClick={handleCheck}
           disabled={arranged.length !== words.length}
-          className={cn(
-            'w-full btn-primary py-3.5',
-            arranged.length !== words.length && 'opacity-40 cursor-not-allowed',
-          )}
+          className="btn-primary w-full justify-center py-3.5"
         >
-          Check ✓
+          Check
         </button>
-      )}
-
-      {submitted && (
-        <div className={cn(
-          'rounded-xl p-4 text-center font-medium',
-          isCorrect ? 'bg-sage2 text-sage' : 'bg-coral/10 text-coral',
-        )}>
-          {isCorrect ? '✅ Perfect!' : `❌ Correct answer: "${correct}"`}
+      ) : (
+        <div className={isCorrect ? 'feedback-correct' : 'feedback-wrong'}>
+          {isCorrect ? (
+            <>
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#2E7D5A" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+              <span>Correct!</span>
+            </>
+          ) : (
+            <>
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--terra)' }}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              <span>Answer: <span className="font-serif italic ml-1" style={{ color: 'var(--navy)' }}>{correct}</span></span>
+            </>
+          )}
         </div>
       )}
     </div>

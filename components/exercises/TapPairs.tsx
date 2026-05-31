@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
-interface Pair { pt: string; en: string; }
+interface Pair { pt: string; en: string }
 
 interface TapPairsProps {
   instruction: string;
@@ -11,65 +11,81 @@ interface TapPairsProps {
   onResult: (correct: boolean) => void;
 }
 
-type SelectedSide = { side: 'pt' | 'en'; value: string } | null;
+type Selection = { side: 'pt' | 'en'; value: string } | null;
 
 export default function TapPairs({ instruction, pairs, onResult }: TapPairsProps) {
-  const [selected, setSelected] = useState<SelectedSide>(null);
-  const [matched, setMatched] = useState<Set<string>>(new Set());
-  const [wrong, setWrong] = useState<string[]>([]);
-  const [mistakes, setMistakes] = useState(0);
+  const [selection, setSelection] = useState<Selection>(null);
+  const [matched, setMatched]     = useState<Set<string>>(new Set());
+  const [shaking, setShaking]     = useState<string[]>([]);
+  const [mistakes, setMistakes]   = useState(0);
 
-  // Shuffle the EN column for display
+  // Shuffle EN column once
   const [shuffledEn] = useState(() => [...pairs].sort(() => Math.random() - 0.5));
 
   useEffect(() => {
-    if (matched.size === pairs.length) {
-      setTimeout(() => onResult(mistakes === 0), 500);
+    if (matched.size === pairs.length * 2) {
+      setTimeout(() => onResult(mistakes === 0), 400);
     }
   }, [matched, pairs.length, mistakes, onResult]);
 
   const handleTap = (side: 'pt' | 'en', value: string) => {
     if (matched.has(value)) return;
 
-    if (!selected) {
-      setSelected({ side, value });
+    // Same side — switch selection
+    if (selection?.side === side) {
+      setSelection({ side, value });
       return;
     }
 
-    if (selected.side === side) {
-      // Same side — switch selection
-      setSelected({ side, value });
+    // Nothing selected yet
+    if (!selection) {
+      setSelection({ side, value });
       return;
     }
 
-    // Different sides — check match
-    const ptVal = side === 'pt' ? value : selected.value;
-    const enVal = side === 'en' ? value : selected.value;
-    const pair = pairs.find(p => p.pt === ptVal && p.en === enVal);
+    // Cross-side — attempt match
+    const ptVal = side === 'pt' ? value : selection.value;
+    const enVal = side === 'en' ? value : selection.value;
+    const pair  = pairs.find(p => p.pt === ptVal && p.en === enVal);
 
     if (pair) {
       setMatched(prev => new Set([...prev, pair.pt, pair.en]));
     } else {
       setMistakes(m => m + 1);
-      setWrong([ptVal, enVal]);
-      setTimeout(() => setWrong([]), 600);
+      setShaking([ptVal, enVal]);
+      setTimeout(() => setShaking([]), 400);
     }
-    setSelected(null);
+    setSelection(null);
   };
 
-  const isSelected = (side: 'pt' | 'en', value: string) =>
-    selected?.side === side && selected?.value === value;
+  const isSelected = (side: 'pt' | 'en', v: string) =>
+    selection?.side === side && selection.value === v;
+
+  const chipClass = (side: 'pt' | 'en', value: string, isSansFont?: boolean) =>
+    cn(
+      'w-full px-4 py-3 rounded-xl border-2 text-center transition-all duration-200 cursor-pointer',
+      isSansFont ? 'text-sm font-medium' : 'font-serif text-lg',
+      matched.has(value) && 'opacity-50 cursor-default',
+      shaking.includes(value) && 'animate-shake',
+      matched.has(value)
+        ? 'border-[rgba(58,125,92,.38)] bg-[rgba(58,125,92,.09)] text-[#2E7D5A]'
+        : isSelected(side, value)
+          ? 'border-[rgba(26,59,158,.4)] bg-[rgba(26,59,158,.08)] text-[#1A3B9E] scale-105'
+          : 'border-[var(--border)] bg-[var(--ivory)] hover:border-[var(--border-2)] hover:bg-[var(--cream-2)]',
+    );
 
   return (
-    <div className="animate-slide-up">
-      <div className="flex items-start gap-3 mb-6">
-        <div className="text-xl">🤝</div>
-        <div>
-          <div className="text-xs font-bold text-txt3 uppercase tracking-widest mb-1">Tap to match</div>
-          <p className="font-medium text-txt2">{instruction}</p>
-        </div>
+    <div className="animate-slide-up flex flex-col gap-5">
+
+      {/* Prompt */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--muted)' }}>
+          Tap to match
+        </p>
+        <p className="text-sm font-medium" style={{ color: 'var(--navy)' }}>{instruction}</p>
       </div>
 
+      {/* Grid */}
       <div className="grid grid-cols-2 gap-3">
         {/* PT column */}
         <div className="flex flex-col gap-3">
@@ -78,13 +94,7 @@ export default function TapPairs({ instruction, pairs, onResult }: TapPairsProps
               key={p.pt}
               onClick={() => handleTap('pt', p.pt)}
               disabled={matched.has(p.pt)}
-              className={cn(
-                'rounded-xl border-2 px-3 py-3 font-serif text-lg text-center transition-all duration-200',
-                matched.has(p.pt) && 'border-sage bg-sage2 text-sage opacity-60 cursor-default',
-                wrong.includes(p.pt) && 'border-coral bg-coral/10 animate-pop-in',
-                isSelected('pt', p.pt) && 'border-blu bg-blu4 text-blu scale-105',
-                !matched.has(p.pt) && !wrong.includes(p.pt) && !isSelected('pt', p.pt) && 'border-brd bg-ivory hover:border-blu2 hover:bg-blu4/20',
-              )}
+              className={chipClass('pt', p.pt)}
             >
               {p.pt}
             </button>
@@ -98,13 +108,7 @@ export default function TapPairs({ instruction, pairs, onResult }: TapPairsProps
               key={p.en}
               onClick={() => handleTap('en', p.en)}
               disabled={matched.has(p.en)}
-              className={cn(
-                'rounded-xl border-2 px-3 py-3 text-sm font-medium text-center transition-all duration-200',
-                matched.has(p.en) && 'border-sage bg-sage2 text-sage opacity-60 cursor-default',
-                wrong.includes(p.en) && 'border-coral bg-coral/10 animate-pop-in',
-                isSelected('en', p.en) && 'border-blu bg-blu4 text-blu scale-105',
-                !matched.has(p.en) && !wrong.includes(p.en) && !isSelected('en', p.en) && 'border-brd bg-ivory hover:border-blu2 hover:bg-blu4/20',
-              )}
+              className={chipClass('en', p.en, true)}
             >
               {p.en}
             </button>
@@ -112,9 +116,10 @@ export default function TapPairs({ instruction, pairs, onResult }: TapPairsProps
         </div>
       </div>
 
+      {/* Progress indicator */}
       {matched.size > 0 && (
-        <p className="text-center text-xs text-txt3 mt-4">
-          {matched.size / 2} / {pairs.length} matched ✨
+        <p className="text-center text-xs font-medium" style={{ color: 'var(--muted)' }}>
+          {matched.size / 2} of {pairs.length} matched
         </p>
       )}
     </div>
